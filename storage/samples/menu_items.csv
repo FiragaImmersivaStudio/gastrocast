@@ -1,0 +1,13 @@
+sku,name,category,cogs,price,is_active
+BURGER-001,Classic Beef Burger,Mains,8.50,15.95,true
+BURGER-002,Cheese Deluxe,Mains,9.25,17.95,true
+BURGER-003,Veggie Burger,Mains,7.50,14.95,true
+BURGER-004,BBQ Bacon Burger,Mains,10.75,19.95,true
+SIDE-001,French Fries,Sides,2.50,5.95,true
+SIDE-002,Onion Rings,Sides,3.25,6.95,true
+SIDE-003,Sweet Potato Fries,Sides,3.50,7.95,true
+BEV-001,Soft Drink,Beverages,0.75,2.95,true
+BEV-002,Craft Beer,Beverages,2.50,5.95,true
+BEV-003,Fresh Juice,Beverages,1.25,3.95,true
+DESS-001,Chocolate Brownie,Desserts,2.25,6.95,true
+DESS-002,Ice Cream Sundae,Desserts,1.75,5.95,true

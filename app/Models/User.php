@@ -7,12 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,17 +44,6 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Activity log options
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'email'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
-    }
-
-    /**
      * Restaurants that this user owns
      */
     public function ownedRestaurants()
@@ -72,14 +59,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Restaurant::class, 'restaurant_user')
             ->withPivot('role', 'joined_at')
             ->withTimestamps();
-    }
-
-    /**
-     * What-if scenarios created by this user
-     */
-    public function whatifScenarios()
-    {
-        return $this->hasMany(WhatifScenario::class, 'created_by');
     }
 
     /**

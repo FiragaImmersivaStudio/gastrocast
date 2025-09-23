@@ -1,66 +1,233 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CustiCast - Restaurant Intelligence Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive multi-tenant restaurant analytics and forecasting platform built with **Laravel 10**, featuring AI-powered insights, operational optimization, and advanced reporting capabilities.
 
-## About Laravel
+## 🎯 Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+CustiCast is a sophisticated restaurant intelligence platform that provides:
+- **Multi-tenant Architecture**: Users can manage multiple restaurant locations
+- **AI-Powered Insights**: LLM-generated summaries and actionable recommendations
+- **Advanced Forecasting**: Predict traffic, revenue, and demand patterns
+- **Operational Optimization**: Staff scheduling, inventory management, menu engineering
+- **Real-time Analytics**: Interactive dashboards with Highcharts visualizations
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏗️ Architecture
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Technology Stack
+- **Backend**: Laravel 10 (PHP 8.2+)
+- **Database**: MySQL/PostgreSQL/SQLite
+- **Authentication**: Laravel Sanctum
+- **UI Framework**: Bootstrap 5 with custom theming
+- **Charts**: Highcharts
+- **Frontend**: jQuery + AJAX
+- **PDF Generation**: DomPDF
+- **Permissions**: Spatie Laravel Permission
+- **Activity Logging**: Spatie Laravel ActivityLog
+- **LLM Integration**: Groq API / Router API
 
-## Learning Laravel
+### Database Schema
+The platform includes 24+ tables covering:
+- **Multi-tenancy**: Users, restaurants, role-based access
+- **Operations**: Orders, menu items, inventory, staff management
+- **Analytics**: Hourly/daily metrics, forecasts, LLM summaries
+- **Advanced Features**: What-if scenarios, promotions, kitchen workflow
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🚀 Quick Start
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- Database (MySQL/PostgreSQL/SQLite)
+- Redis (optional, for sessions/cache)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Installation
 
-## Laravel Sponsors
+1. **Clone the repository**
+```bash
+git clone https://github.com/FiragaImmersivaStudio/gastrocast.git
+cd gastrocast
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install dependencies**
+```bash
+composer install
+npm install
+```
 
-### Premium Partners
+3. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. **Configure your `.env` file**
+```env
+APP_NAME="CustiCast"
+DB_CONNECTION=mysql
+DB_DATABASE=custicast
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 
-## Contributing
+# LLM Integration
+LLM_PROVIDER=groq
+GROQ_API_KEY=your_groq_api_key_here
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Feature Flags
+EMAIL_VERIFICATION_ENABLED=true
+WHATIF_ENABLED=true
 
-## Code of Conduct
+# Theme Colors
+THEME_PRIMARY=#7A001F
+THEME_ACCENT=#FFC107
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Database setup**
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-## Security Vulnerabilities
+6. **Build assets**
+```bash
+npm run build
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+7. **Start the development server**
+```bash
+php artisan serve
+```
 
-## License
+## 📊 Core Features
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 1. Overview Dashboard
+- **KPI Cards**: Visitors, Transactions, GMV, Conversion Rate, AOV, MAPE
+- **Forecast Charts**: Time series with confidence intervals
+- **LLM Summaries**: AI-generated insights and recommendations
+- **Quick Actions**: Generate forecasts, export reports
+
+### 2. Restaurant Management
+- **Multi-location Support**: Each restaurant = separate tenant
+- **Role-based Access**: Owner, Manager, Staff permissions
+- **Settings**: Operating hours, contact info, preferences
+- **Activity Logging**: Track all changes and access
+
+### 3. Data & Analytics
+- **CSV Import**: Orders, menu items, inventory, staff data
+- **Data Validation**: Automatic error detection and reporting
+- **Forecasting Engine**: Time series forecasting with confidence intervals
+- **Performance Metrics**: MAPE, MAE, RMSE
+
+### 4. Operational Optimization
+- **Staffing Planner**: Demand-based scheduling
+- **Inventory Management**: Safety stock, reorder points
+- **Menu Engineering**: Popularity vs. Profitability analysis
+- **What-If Laboratory**: Scenario modeling and A/B comparisons
+
+## 🔧 API Endpoints
+
+All API endpoints are defined in `routes/web.php` with the `/api` prefix:
+
+### Authentication
+- `POST /api/auth/login` - User login with Remember Me
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/logout` - User logout
+
+### Restaurants
+- `GET /api/restaurants` - List user's restaurants
+- `POST /api/restaurants` - Create new restaurant
+- `PUT /api/restaurants/{id}` - Update restaurant
+
+### Forecasting
+- `POST /api/forecast/run` - Generate forecast
+- `GET /api/forecast/summary` - Get LLM summary
+- `GET /api/forecast/{id}` - Get forecast details
+
+### Analytics
+- `GET /api/metrics/overview` - Dashboard KPIs
+- `GET /api/metrics/trends` - Time series data
+- `GET /api/metrics/heatmap` - Hour×Day heatmap data
+
+## 🗂️ Data Import Formats
+
+### Orders CSV
+```csv
+order_no,order_dt,channel,gross_amount,net_amount,waiting_time_sec,party_size
+ORD-001,2024-01-15 12:30:00,dine_in,45.50,42.75,720,2
+```
+
+### Menu Items CSV
+```csv
+sku,name,category,cogs,price,is_active
+BURGER-001,Classic Burger,Mains,8.50,15.95,true
+```
+
+### Inventory Items CSV
+```csv
+sku,name,uom,safety_stock,reorder_point
+BEEF-PATTY,Beef Patty,pcs,50,20
+```
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary**: `#7A001F` (Maroon)
+- **Accent**: `#FFC107` (Yellow)
+- **Neutral**: Various shades of gray
+
+### UI Components
+- **Cards**: Rounded corners, subtle shadows
+- **Tables**: Responsive with pagination
+- **Charts**: Highcharts with custom theming
+- **Forms**: Bootstrap-styled with validation
+- **Navigation**: Collapsible sidebar + top navbar
+
+## 🔐 Security & Permissions
+
+### Authentication
+- **Laravel Sanctum**: Stateful authentication for SPAs
+- **CSRF Protection**: All forms protected
+- **Email Verification**: Optional via system parameters
+- **Remember Me**: Extended session duration
+
+### Authorization
+- **Multi-tenant Scoping**: Automatic data isolation
+- **Role-based Access**: Owner > Manager > Staff hierarchy
+- **Route Protection**: Middleware-based access control
+
+## 🤖 AI & LLM Integration
+
+### Supported Providers
+- **Groq**: Fast inference with Llama models
+- **Router API**: Internal model routing system
+
+### Use Cases
+- **Executive Summaries**: Weekly performance insights
+- **Forecasting Explanations**: Why metrics are trending
+- **Actionable Recommendations**: Specific next steps
+- **Anomaly Interpretation**: Unusual pattern explanations
+
+## 📞 Support & Contributing
+
+### Demo Account
+- **Email**: `demo@custicast.com`
+- **Password**: `demo123`
+- **Restaurants**: 2 demo locations with sample data
+
+### Sample Data
+The seeder creates:
+- 1 demo user account
+- 2 sample restaurants
+- 3 months of historical orders
+- Sample menu items and inventory
+- Demo staff and schedules
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Built with ❤️ for the restaurant industry**
+
+Transform your restaurant operations with data-driven insights and AI-powered recommendations.

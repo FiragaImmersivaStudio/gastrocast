@@ -1,0 +1,11 @@
+sku,name,uom,safety_stock,reorder_point
+BEEF-PATTY,Beef Patty,pcs,50,20
+CHICKEN-BREAST,Chicken Breast,kg,10,5
+CHEESE-SLICE,Cheese Slice,pcs,100,40
+LETTUCE,Fresh Lettuce,heads,20,8
+TOMATO,Fresh Tomato,kg,15,6
+ONION,Yellow Onion,kg,25,10
+POTATO,Russet Potato,kg,50,20
+OIL-COOKING,Cooking Oil,liter,20,8
+FLOUR,All Purpose Flour,kg,30,12
+SALT,Table Salt,kg,10,4
