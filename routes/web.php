@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
@@ -24,7 +25,10 @@ use App\Http\Controllers\Api\MetricsApiController;
 Route::middleware(['web'])->group(function () {
     // Welcome page
     Route::get('/', function () {
-        return redirect()->route('dashboard');
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return redirect()->route('login');
     });
 
     // Authentication routes
