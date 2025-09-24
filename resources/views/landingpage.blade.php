@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CustiCast - Smart Visitor & Dining Forecasting for Malls</title>
-    <meta name="description" content="AI-powered forecasting platform for malls and F&B tenants. Predict customer flow and optimize performance using visitor data, weather, holidays, and events." />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>CustiCast - Restaurant Intelligence Platform</title>
+    <meta name="description" content="AI-powered restaurant intelligence platform for F&B businesses. Predict customer flow, optimize operations, and boost profitability with smart forecasting and actionable insights." />
     <meta name="author" content="CustiCast" />
-    <meta name="keywords" content="mall analytics, F&B forecasting, visitor prediction, retail analytics, AI forecasting, customer flow" />
+    <meta name="keywords" content="restaurant analytics, F&B forecasting, restaurant intelligence, operational optimization, AI forecasting, customer flow, inventory management" />
 
-    <meta property="og:title" content="CustiCast - Smart Visitor & Dining Forecasting" />
-    <meta property="og:description" content="Transform your mall and F&B operations with AI-powered forecasting that considers weather, holidays, and events." />
+    <meta property="og:title" content="CustiCast - Restaurant Intelligence Platform" />
+    <meta property="og:description" content="Transform your restaurant operations with AI-powered forecasting, inventory optimization, and smart staffing recommendations." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
@@ -90,23 +91,23 @@
             <div class="hero-content">
               <div class="hero-text">
                 <h1 class="hero-title">
-                  Predict Customer Flow.
-                  <span class="text-primary">Optimize F&B Performance.</span>
+                  Predict Customer Demand.
+                  <span class="text-primary">Optimize Restaurant Performance.</span>
                 </h1>
                 <p class="hero-subtitle">
-                  CustiCast combines visitor data, transactions, and external conditions like weather, 
-                  national holidays, and events to deliver accurate forecasts and actionable insights.
+                  CustiCast combines transaction data, customer behavior, and external factors like weather and holidays 
+                  to deliver precise forecasts, inventory optimization, and staffing recommendations for your restaurant.
                 </p>
               </div>
               
               <div class="hero-buttons">
-                <button class="btn btn-hero btn-lg group">
+                <a href="{{ route('dashboard') }}" class="btn btn-hero btn-lg group">
                   Get Started
                   <svg class="icon-sm ml-2 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"></path>
                   </svg>
-                </button>
-                <button class="btn btn-demo btn-lg group">
+                </a>
+                <button class="btn btn-demo btn-lg group" onclick="showDemoModal()">
                   <svg class="icon-sm mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"></path>
                   </svg>
@@ -117,16 +118,16 @@
               <!-- Key Stats -->
               <div class="hero-stats">
                 <div class="stat">
-                  <div class="stat-number">95%</div>
-                  <div class="stat-label">Accuracy</div>
+                  <div class="stat-number">98%</div>
+                  <div class="stat-label">Forecast Accuracy</div>
                 </div>
                 <div class="stat">
-                  <div class="stat-number">24/7</div>
-                  <div class="stat-label">Monitoring</div>
+                  <div class="stat-number">25%</div>
+                  <div class="stat-label">Cost Reduction</div>
                 </div>
                 <div class="stat">
-                  <div class="stat-number">15+</div>
-                  <div class="stat-label">Data Sources</div>
+                  <div class="stat-number">12+</div>
+                  <div class="stat-label">Restaurant Modules</div>
                 </div>
               </div>
             </div>
@@ -136,7 +137,7 @@
               <div class="hero-image">
                 <img
                   src="assets/hero-dashboard.jpg"
-                  alt="CustiCast Analytics Dashboard"
+                  alt="CustiCast Restaurant Intelligence Dashboard"
                 />
                 <div class="hero-overlay"></div>
               </div>
@@ -150,8 +151,8 @@
                     </svg>
                   </div>
                   <div>
-                    <div class="floating-card-number">+12%</div>
-                    <div class="floating-card-label">Traffic Increase</div>
+                    <div class="floating-card-number">+18%</div>
+                    <div class="floating-card-label">Revenue Increase</div>
                   </div>
                 </div>
               </div>
@@ -166,7 +167,7 @@
           <div class="section-header">
             <h2 class="section-title">Why CustiCast?</h2>
             <p class="section-subtitle">
-              Powered by AI and designed specifically for malls and F&B businesses
+              Powered by AI and designed specifically for restaurant and F&B operations
             </p>
           </div>
 
@@ -179,7 +180,7 @@
               </div>
               <h3 class="feature-title">Smart Forecasting</h3>
               <p class="feature-description">
-                Uses AI and machine learning to predict visitor traffic and F&B sales with exceptional accuracy.
+                Uses AI and machine learning to predict customer demand, sales, and optimal inventory levels with exceptional accuracy.
               </p>
             </div>
 
@@ -191,7 +192,7 @@
               </div>
               <h3 class="feature-title">Multi-Condition Inputs</h3>
               <p class="feature-description">
-                Considers not just mall traffic but also external factors like weather, public holidays, and events.
+                Considers transaction history, seasonal patterns, weather conditions, holidays, and local events to provide comprehensive insights.
               </p>
             </div>
 
@@ -203,7 +204,7 @@
               </div>
               <h3 class="feature-title">Detailed Analytics</h3>
               <p class="feature-description">
-                Interactive charts, heatmaps, and statistics to show traffic flow, peak hours, and conversion.
+                Interactive dashboards, sales heatmaps, and performance metrics to track revenue, customer patterns, and operational efficiency.
               </p>
             </div>
 
@@ -215,7 +216,7 @@
               </div>
               <h3 class="feature-title">Actionable Insights</h3>
               <p class="feature-description">
-                Recommendations for staffing, inventory, and promotions based on intelligent predictions.
+                Smart recommendations for staffing schedules, inventory management, menu optimization, and promotional strategies.
               </p>
             </div>
           </div>
@@ -452,9 +453,9 @@
       <section id="use-cases" class="use-cases-section">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">Built for Every Stakeholder</h2>
+            <h2 class="section-title">Built for Every Restaurant Role</h2>
             <p class="section-subtitle">
-              Tailored insights for different roles in the mall ecosystem
+              Tailored insights for different roles in your restaurant operation
             </p>
           </div>
 
@@ -465,14 +466,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
               </div>
-              <h3 class="use-case-title">Mall Management</h3>
+              <h3 class="use-case-title">Restaurant Owners</h3>
               <p class="use-case-description">
-                Plan staffing schedules, optimize marketing campaigns, and coordinate mall-wide events based on predicted traffic patterns.
+                Make strategic decisions with comprehensive insights into revenue trends, operational efficiency, and growth opportunities.
               </p>
               <ul class="use-case-benefits">
-                <li>Staff optimization during peak hours</li>
-                <li>Event planning with traffic forecasts</li>
-                <li>Marketing budget allocation</li>
+                <li>Revenue optimization strategies</li>
+                <li>Multi-location performance comparison</li>
+                <li>ROI analysis for marketing campaigns</li>
               </ul>
             </div>
 
@@ -482,14 +483,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 3H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
                 </svg>
               </div>
-              <h3 class="use-case-title">F&B Tenants</h3>
+              <h3 class="use-case-title">Restaurant Managers</h3>
               <p class="use-case-description">
-                Predict customer demand, reduce food waste, and optimize inventory management with accurate sales forecasting.
+                Optimize daily operations with accurate demand forecasting, smart staffing recommendations, and inventory management.
               </p>
               <ul class="use-case-benefits">
                 <li>Demand-based inventory planning</li>
+                <li>Staff scheduling optimization</li>
                 <li>Waste reduction strategies</li>
-                <li>Promotional timing optimization</li>
               </ul>
             </div>
 
@@ -499,14 +500,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
               </div>
-              <h3 class="use-case-title">Analytics Teams</h3>
+              <h3 class="use-case-title">Operations Teams</h3>
               <p class="use-case-description">
-                Monitor performance trends, identify opportunities, and improve operational efficiency with comprehensive data insights.
+                Monitor kitchen efficiency, track service times, and identify bottlenecks with real-time operational analytics.
               </p>
               <ul class="use-case-benefits">
-                <li>Performance trend analysis</li>
-                <li>Operational efficiency metrics</li>
-                <li>Strategic planning support</li>
+                <li>Kitchen performance monitoring</li>
+                <li>Service time optimization</li>
+                <li>Quality control tracking</li>
               </ul>
             </div>
           </div>
@@ -538,33 +539,33 @@
           <div class="cta-content">
             <div class="cta-text">
               <h2 class="cta-title">
-                See the Future of Mall & F&B Analytics
+                Transform Your Restaurant with AI Intelligence
               </h2>
               <p class="cta-subtitle">
-                CustiCast helps you make smarter decisions by combining your data with external conditions. 
-                Join the revolution in retail forecasting.
+                CustiCast helps restaurant owners and managers make smarter decisions by combining your operational data with intelligent forecasting. 
+                Join the revolution in restaurant analytics.
               </p>
             </div>
 
             <!-- Key Value Props -->
             <div class="cta-stats">
               <div class="cta-stat">
-                <div class="cta-stat-number">95%</div>
+                <div class="cta-stat-number">98%</div>
                 <div class="cta-stat-label">Forecast Accuracy</div>
               </div>
               <div class="cta-stat">
-                <div class="cta-stat-number">15+</div>
-                <div class="cta-stat-label">External Data Sources</div>
+                <div class="cta-stat-number">25%</div>
+                <div class="cta-stat-label">Cost Reduction</div>
               </div>
               <div class="cta-stat">
                 <div class="cta-stat-number">24/7</div>
-                <div class="cta-stat-label">Real-time Monitoring</div>
+                <div class="cta-stat-label">Real-time Insights</div>
               </div>
             </div>
 
             <!-- CTA Buttons -->
             <div class="cta-buttons">
-              <button class="btn btn-cta-primary">
+              <button class="btn btn-cta-primary" onclick="showRequestDemoModal()">
                 <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
@@ -573,7 +574,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7"></path>
                 </svg>
               </button>
-              <button class="btn btn-cta-secondary">
+              <button class="btn btn-cta-secondary" onclick="showContactModal()">
                 <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
@@ -584,7 +585,7 @@
             <!-- Trust Indicators -->
             <div class="trust-indicators">
               <p class="trust-text">
-                Trusted by leading malls and F&B chains across the region
+                Trusted by restaurants and F&B chains across Southeast Asia
               </p>
               <div class="trust-logos">
                 <div class="trust-logo"></div>
@@ -607,8 +608,8 @@
             <div>
               <h3 class="footer-logo">CustiCast</h3>
               <p class="footer-description">
-                Smart visitor and dining forecasting for malls and F&B tenants. 
-                Leveraging AI to predict customer flow and optimize business performance.
+                Restaurant Intelligence Platform powered by AI. 
+                Optimize operations, predict demand, and boost profitability with smart forecasting and actionable insights.
               </p>
             </div>
             
@@ -688,11 +689,314 @@
             © 2024 CustiCast. All rights reserved.
           </div>
           <div class="footer-tagline">
-            Powered by AI • Built for the future of retail
+            Powered by AI • Built for restaurant success
           </div>
         </div>
       </div>
     </footer>
+
+    <!-- Demo Video Modal -->
+    <div id="demoModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>CustiCast Demo Video</h3>
+          <span class="close" onclick="closeDemoModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="video-wrapper">
+            <iframe id="demoVideo" width="100%" height="400" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request Demo Modal -->
+    <div id="requestDemoModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Request a Demo</h3>
+          <span class="close" onclick="closeRequestDemoModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="requestDemoForm">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input type="text" id="fullName" name="full_name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="company">Restaurant/Company Name *</label>
+              <input type="text" id="company" name="company" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="restaurantType">Restaurant Type</label>
+              <select id="restaurantType" name="restaurant_type">
+                <option value="">Select Type</option>
+                <option value="fast-food">Fast Food</option>
+                <option value="casual-dining">Casual Dining</option>
+                <option value="fine-dining">Fine Dining</option>
+                <option value="cafe">Cafe</option>
+                <option value="food-court">Food Court</option>
+                <option value="chain">Restaurant Chain</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="locations">Number of Locations</label>
+              <select id="locations" name="locations">
+                <option value="1">1</option>
+                <option value="2-5">2-5</option>
+                <option value="6-10">6-10</option>
+                <option value="11-25">11-25</option>
+                <option value="25+">25+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="4" placeholder="Tell us about your restaurant and what you'd like to see in the demo..."></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeRequestDemoModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Send Demo Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Sales Modal -->
+    <div id="contactModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Contact Sales</h3>
+          <span class="close" onclick="closeContactModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="contactForm">
+            <div class="form-group">
+              <label for="contactName">Full Name *</label>
+              <input type="text" id="contactName" name="full_name" required>
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Email Address *</label>
+              <input type="email" id="contactEmail" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="contactCompany">Restaurant/Company Name *</label>
+              <input type="text" id="contactCompany" name="company" required>
+            </div>
+            <div class="form-group">
+              <label for="contactPhone">Phone Number</label>
+              <input type="tel" id="contactPhone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="inquiry">Inquiry Type</label>
+              <select id="inquiry" name="inquiry_type">
+                <option value="pricing">Pricing Information</option>
+                <option value="features">Feature Questions</option>
+                <option value="integration">Integration Support</option>
+                <option value="enterprise">Enterprise Solutions</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactMessage">Message *</label>
+              <textarea id="contactMessage" name="message" rows="4" placeholder="How can we help you?" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s;
+      }
+      
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s;
+      }
+      
+      .modal-header {
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #7A001F;
+        color: white;
+        border-radius: 12px 12px 0 0;
+      }
+      
+      .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      
+      .close {
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+      }
+      
+      .close:hover {
+        opacity: 0.7;
+      }
+      
+      .modal-body {
+        padding: 25px;
+      }
+      
+      .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+      }
+      
+      .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      
+      .form-group {
+        margin-bottom: 20px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+      }
+      
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #7A001F;
+        box-shadow: 0 0 0 3px rgba(122, 0, 31, 0.1);
+      }
+      
+      .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+      
+      .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .btn-primary {
+        background-color: #7A001F;
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background-color: #5a0017;
+        transform: translateY(-1px);
+      }
+      
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideIn {
+        from { 
+          opacity: 0;
+          transform: translateY(-50px);
+        }
+        to { 
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .modal-content {
+          margin: 10px;
+          width: calc(100% - 20px);
+        }
+        
+        .modal-body {
+          padding: 20px;
+        }
+        
+        .form-actions {
+          flex-direction: column;
+        }
+        
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
 
     <script src="script.js"></script>
   </body>

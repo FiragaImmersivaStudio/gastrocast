@@ -114,6 +114,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Email Address
+    |--------------------------------------------------------------------------
+    |
+    | This email address will receive demo requests and contact messages
+    | from the website forms.
+    |
+    */
+
+    'admin_email' => env('MAIL_ADMIN_EMAIL', 'sales@custicast.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |

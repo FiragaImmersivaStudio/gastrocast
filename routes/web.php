@@ -32,6 +32,12 @@ Route::middleware(['web'])->group(function () {
         // return redirect()->route('login');
     });
 
+    // Public API endpoints (no auth required)
+    Route::prefix('api')->group(function () {
+        Route::post('/send-demo-request', [App\Http\Controllers\Api\PublicApiController::class, 'sendDemoRequest']);
+        Route::post('/send-contact-message', [App\Http\Controllers\Api\PublicApiController::class, 'sendContactMessage']);
+    });
+
     // Authentication routes
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);

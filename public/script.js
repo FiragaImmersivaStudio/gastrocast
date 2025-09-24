@@ -203,4 +203,172 @@ document.addEventListener('DOMContentLoaded', function() {
       heroSection.style.transform = 'translateY(0)';
     }
   }, 100);
-})
+});
+
+// Demo Video Modal Functions
+function showDemoModal() {
+  const modal = document.getElementById('demoModal');
+  const video = document.getElementById('demoVideo');
+  
+  // Replace with your actual YouTube video ID for CustiCast demo
+  // For now using a generic restaurant analytics demo video
+  const youtubeVideoId = 'JI7Y4TbLJls'; // Example: Restaurant Analytics demo
+  video.src = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`;
+  
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDemoModal() {
+  const modal = document.getElementById('demoModal');
+  const video = document.getElementById('demoVideo');
+  
+  modal.style.display = 'none';
+  video.src = '';
+  document.body.style.overflow = 'auto';
+}
+
+// Request Demo Modal Functions
+function showRequestDemoModal() {
+  const modal = document.getElementById('requestDemoModal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRequestDemoModal() {
+  const modal = document.getElementById('requestDemoModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+  document.getElementById('requestDemoForm').reset();
+}
+
+// Contact Sales Modal Functions
+function showContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeContactModal() {
+  const modal = document.getElementById('contactModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+  document.getElementById('contactForm').reset();
+}
+
+// Close modals when clicking outside
+window.addEventListener('click', function(event) {
+  const demoModal = document.getElementById('demoModal');
+  const requestModal = document.getElementById('requestDemoModal');
+  const contactModal = document.getElementById('contactModal');
+  
+  if (event.target === demoModal) {
+    closeDemoModal();
+  }
+  if (event.target === requestModal) {
+    closeRequestDemoModal();
+  }
+  if (event.target === contactModal) {
+    closeContactModal();
+  }
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeDemoModal();
+    closeRequestDemoModal();
+    closeContactModal();
+  }
+});
+
+// Form Submission Handlers
+document.addEventListener('DOMContentLoaded', function() {
+  // Request Demo Form Handler
+  const requestDemoForm = document.getElementById('requestDemoForm');
+  if (requestDemoForm) {
+    requestDemoForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      
+      // Show loading state
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+      
+      // Send email request (replace with actual endpoint)
+      fetch('/api/send-demo-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Demo request sent successfully! We will contact you within 24 hours.');
+          closeRequestDemoModal();
+        } else {
+          throw new Error(data.message || 'Failed to send demo request');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send demo request. Please try again or contact us directly.');
+      })
+      .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
+    });
+  }
+  
+  // Contact Form Handler
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      
+      // Show loading state
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+      
+      // Send email request (replace with actual endpoint)
+      fetch('/api/send-contact-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Message sent successfully! Our sales team will contact you soon.');
+          closeContactModal();
+        } else {
+          throw new Error(data.message || 'Failed to send message');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send message. Please try again or contact us directly.');
+      })
+      .finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
+    });
+  }
+});

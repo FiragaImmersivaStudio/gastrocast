@@ -222,6 +222,40 @@ The seeder creates:
 - Sample menu items and inventory
 - Demo staff and schedules
 
+## 🌐 Landing Page Features
+
+### Responsive Design
+- **Mobile-first**: Optimized for all devices
+- **Restaurant-focused**: Tailored messaging for F&B industry
+- **Interactive Elements**: Smooth animations and transitions
+
+### Demo & Contact Forms
+- **YouTube Demo Modal**: Embedded video demo with autoplay
+- **Request Demo Form**: Comprehensive lead capture with email notifications
+- **Contact Sales Form**: Direct inquiry handling with auto-response
+- **Email Integration**: Automatic confirmation and admin notifications
+
+### Call-to-Action Buttons
+- **Get Started**: Direct link to dashboard (requires authentication)
+- **See Demo**: Opens YouTube video modal
+- **Request Demo**: Launches detailed demo request form
+- **Contact Sales**: Opens sales inquiry form
+
+### Email Configuration
+Add these variables to your `.env` file:
+```bash
+# Email Configuration for Landing Page
+MAIL_ADMIN_EMAIL="sales@custicast.com"
+MAIL_FROM_ADDRESS="hello@custicast.com"
+MAIL_FROM_NAME="CustiCast"
+```
+
+Email templates are located in `resources/views/emails/`:
+- `demo-request.blade.php` - Admin notification for demo requests
+- `demo-request-confirmation.blade.php` - User confirmation for demo requests
+- `contact-message.blade.php` - Admin notification for contact messages
+- `contact-confirmation.blade.php` - User confirmation for contact messages
+
 ## 📝 License
 
 This project is licensed under the MIT License.
