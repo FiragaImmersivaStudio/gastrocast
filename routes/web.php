@@ -118,7 +118,12 @@ Route::middleware(['web'])->group(function () {
         Route::post('/datasets/import', function () { return response()->json(['message' => 'Import dataset']); });
         Route::get('/datasets/status/{import}', function () { return response()->json(['message' => 'Import status']); });
         
+        // Sample Data API
+        Route::get('/sample-data/info', [App\Http\Controllers\SampleDataController::class, 'info']);
+        Route::get('/sample-data/download/{type}', [App\Http\Controllers\SampleDataController::class, 'download']);
+        
         // LLM Summary API
-        Route::post('/llm/summary', function () { return response()->json(['message' => 'Generate LLM summary']); });
+        Route::post('/llm/summary', [App\Http\Controllers\Api\LlmApiController::class, 'generateSummary']);
+        Route::get('/llm/summary', [App\Http\Controllers\Api\LlmApiController::class, 'getLatestSummary']);
     });
 });

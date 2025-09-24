@@ -103,7 +103,10 @@ class RestaurantApiController extends Controller
         $this->authorize('view', $restaurant);
         
         // Store the selected restaurant in session
-        session(['selected_restaurant_id' => $restaurant->id]);
+        session([
+            'selected_restaurant_id' => $restaurant->id,
+            'active_restaurant_name' => $restaurant->name
+        ]);
 
         return response()->json([
             'data' => $restaurant,
