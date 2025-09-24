@@ -25,10 +25,11 @@ use App\Http\Controllers\Api\MetricsApiController;
 Route::middleware(['web'])->group(function () {
     // Welcome page
     Route::get('/', function () {
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('login');
+        return view('landingpage');
+        // if (Auth::check()) {
+        //     return redirect()->route('dashboard');
+        // }
+        // return redirect()->route('login');
     });
 
     // Authentication routes
