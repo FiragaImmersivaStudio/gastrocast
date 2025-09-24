@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -42,4 +42,39 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Restaurants that this user owns
+     */
+    public function ownedRestaurants()
+    {
+        return $this->hasMany(Restaurant::class, 'owner_user_id');
+    }
+
+    /**
+     * Restaurants that this user has access to (including owned)
+     */
+    public function restaurants()
+    {
+        return $this->belongsToMany(Restaurant::class, 'restaurant_user')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if user has access to a specific restaurant
+     */
+    public function hasAccessToRestaurant($restaurantId)
+    {
+        return $this->restaurants()->where('restaurant_id', $restaurantId)->exists();
+    }
+
+    /**
+     * Get user's role for a specific restaurant
+     */
+    public function getRoleForRestaurant($restaurantId)
+    {
+        $pivot = $this->restaurants()->where('restaurant_id', $restaurantId)->first()?->pivot;
+        return $pivot?->role;
+    }
 }
