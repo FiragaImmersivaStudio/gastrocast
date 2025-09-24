@@ -17,8 +17,10 @@
     
     <style>
         :root {
-            --primary-color: {{ env('THEME_PRIMARY', '#7A001F') }};
-            --accent-color: {{ env('THEME_ACCENT', '#FFC107') }};
+            /* --primary-color: {{ env('THEME_PRIMARY', '#7A001F') }};
+            --accent-color: {{ env('THEME_ACCENT', '#FFC107') }}; */
+            --primary-color: #7A001F;
+            --accent-color: #FFC107;
         }
         
         .navbar-brand {
