@@ -122,7 +122,7 @@
                             <i class="fas fa-user me-1"></i>{{ Auth::user()->name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('settings.index') }}"><i class="fas fa-cog me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}" class="d-inline">
@@ -135,8 +135,8 @@
                         </ul>
                     </div>
                 @else
-                    <a href="#" class="btn btn-outline-primary me-2">Login</a>
-                    <a href="#" class="btn btn-primary">Register</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary me-2">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary">Register</a>
                 @endauth
             </div>
         </div>
@@ -150,62 +150,62 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#">
+                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-2"></i>Overview
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('restaurants.*') ? 'active' : '' }}" href="{{ route('restaurants.index') }}">
                                 <i class="fas fa-store me-2"></i>Restaurants
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('datasets.*') ? 'active' : '' }}" href="{{ route('datasets.index') }}">
                                 <i class="fas fa-database me-2"></i>Datasets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('forecast.*') ? 'active' : '' }}" href="{{ route('forecast.index') }}">
                                 <i class="fas fa-chart-line me-2"></i>Forecast & Insights
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('whatif.*') ? 'active' : '' }}" href="{{ route('whatif.index') }}">
                                 <i class="fas fa-flask me-2"></i>What-If Lab
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('staffing.*') ? 'active' : '' }}" href="{{ route('staffing.index') }}">
                                 <i class="fas fa-users me-2"></i>Staffing Planner
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('inventory.*') ? 'active' : '' }}" href="{{ route('inventory.index') }}">
                                 <i class="fas fa-boxes me-2"></i>Inventory & Waste
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('menu-engineering.*') ? 'active' : '' }}" href="{{ route('menu-engineering.index') }}">
                                 <i class="fas fa-utensils me-2"></i>Menu Engineering
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('promotions.*') ? 'active' : '' }}" href="{{ route('promotions.index') }}">
                                 <i class="fas fa-tags me-2"></i>Promotions
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('operations.*') ? 'active' : '' }}" href="{{ route('operations.index') }}">
                                 <i class="fas fa-cogs me-2"></i>Operations Monitor
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                                 <i class="fas fa-file-pdf me-2"></i>Reports & Export
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
                                 <i class="fas fa-cog me-2"></i>Settings
                             </a>
                         </li>
