@@ -146,7 +146,12 @@ function selectRestaurant(restaurantId) {
     .then(response => response.json())
     .then(data => {
         alert('Restaurant selected successfully!');
-        // Optionally reload page or update UI
+        
+        // Store in session storage for frontend access
+        sessionStorage.setItem('selected_restaurant_id', restaurantId);
+        
+        // Redirect to dashboard to see filtered data
+        window.location.href = '/dashboard';
     })
     .catch(error => {
         console.error('Error:', error);

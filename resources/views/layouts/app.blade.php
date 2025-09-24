@@ -150,62 +150,74 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"
+                               title="Dashboard utama menampilkan KPI real-time, forecasting, dan insights AI untuk monitoring performa restoran secara menyeluruh">
                                 <i class="fas fa-tachometer-alt me-2"></i>Overview
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('restaurants.*') ? 'active' : '' }}" href="{{ route('restaurants.index') }}">
+                            <a class="nav-link {{ request()->routeIs('restaurants.*') ? 'active' : '' }}" href="{{ route('restaurants.index') }}"
+                               title="Kelola data restoran, pilih lokasi aktif untuk filtering data, dan konfigurasi pengaturan per-cabang">
                                 <i class="fas fa-store me-2"></i>Restaurants
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('datasets.*') ? 'active' : '' }}" href="{{ route('datasets.index') }}">
+                            <a class="nav-link {{ request()->routeIs('datasets.*') ? 'active' : '' }}" href="{{ route('datasets.index') }}"
+                               title="Import dan kelola data penjualan, menu, inventori, dan staff. Download sample data untuk referensi format import">
                                 <i class="fas fa-database me-2"></i>Datasets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('forecast.*') ? 'active' : '' }}" href="{{ route('forecast.index') }}">
+                            <a class="nav-link {{ request()->routeIs('forecast.*') ? 'active' : '' }}" href="{{ route('forecast.index') }}"
+                               title="Generate prediksi penjualan menggunakan machine learning, analisis tren, dan confidence intervals untuk planning bisnis">
                                 <i class="fas fa-chart-line me-2"></i>Forecast & Insights
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('whatif.*') ? 'active' : '' }}" href="{{ route('whatif.index') }}">
+                            <a class="nav-link {{ request()->routeIs('whatif.*') ? 'active' : '' }}" href="{{ route('whatif.index') }}"
+                               title="Simulasi skenario what-if untuk testing strategi baru, perubahan menu, atau kondisi bisnis yang berbeda">
                                 <i class="fas fa-flask me-2"></i>What-If Lab
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('staffing.*') ? 'active' : '' }}" href="{{ route('staffing.index') }}">
+                            <a class="nav-link {{ request()->routeIs('staffing.*') ? 'active' : '' }}" href="{{ route('staffing.index') }}"
+                               title="Kelola jadwal staff, optimasi shift berdasarkan prediksi traffic, dan monitoring absensi karyawan">
                                 <i class="fas fa-users me-2"></i>Staffing Planner
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('inventory.*') ? 'active' : '' }}" href="{{ route('inventory.index') }}">
+                            <a class="nav-link {{ request()->routeIs('inventory.*') ? 'active' : '' }}" href="{{ route('inventory.index') }}"
+                               title="Monitor stok bahan baku, prediksi kebutuhan inventory, dan analisis waste untuk efisiensi operasional">
                                 <i class="fas fa-boxes me-2"></i>Inventory & Waste
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('menu-engineering.*') ? 'active' : '' }}" href="{{ route('menu-engineering.index') }}">
+                            <a class="nav-link {{ request()->routeIs('menu-engineering.*') ? 'active' : '' }}" href="{{ route('menu-engineering.index') }}"
+                               title="Analisis profitabilitas menu, optimasi pricing, dan rekomendasi item berdasarkan popularity vs profit margin">
                                 <i class="fas fa-utensils me-2"></i>Menu Engineering
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('promotions.*') ? 'active' : '' }}" href="{{ route('promotions.index') }}">
+                            <a class="nav-link {{ request()->routeIs('promotions.*') ? 'active' : '' }}" href="{{ route('promotions.index') }}"
+                               title="Kelola campaign promosi, discount tracking, dan analisis efektivitas marketing berdasarkan sales impact">
                                 <i class="fas fa-tags me-2"></i>Promotions
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('operations.*') ? 'active' : '' }}" href="{{ route('operations.index') }}">
+                            <a class="nav-link {{ request()->routeIs('operations.*') ? 'active' : '' }}" href="{{ route('operations.index') }}"
+                               title="Monitor operasional real-time, queue management, kitchen performance, dan service time analytics">
                                 <i class="fas fa-cogs me-2"></i>Operations Monitor
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}"
+                               title="Generate laporan comprehensive dalam format PDF/Excel untuk analisis mendalam dan presentasi">
                                 <i class="fas fa-file-pdf me-2"></i>Reports & Export
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
+                            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}"
+                               title="Konfigurasi sistem, user management, notification settings, dan customization platform">
                                 <i class="fas fa-cog me-2"></i>Settings
                             </a>
                         </li>

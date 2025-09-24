@@ -275,7 +275,50 @@
 document.addEventListener('DOMContentLoaded', function() {
     initializeForecastChart();
     initializeHeatmapChart();
+    loadCachedSummary();
 });
+
+// Load cached summary on page load
+function loadCachedSummary() {
+    const restaurantId = getSelectedRestaurantId();
+    
+    fetch('/api/llm/summary?' + new URLSearchParams({
+        context: 'overview',
+        restaurant_id: restaurantId || ''
+    }), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.data) {
+            document.getElementById('ai-summary').innerHTML = data.data.response;
+            
+            if (data.data.action_items && data.data.action_items.length > 0) {
+                const actionItemsHtml = data.data.action_items.map(item => `<li>${item}</li>`).join('');
+                document.getElementById('ai-actions').innerHTML = actionItemsHtml;
+            }
+        }
+    })
+    .catch(error => {
+        console.log('No cached summary available, using default content');
+    });
+}
+
+// Get selected restaurant ID from session or dropdown
+function getSelectedRestaurantId() {
+    // Try to get from session storage first
+    const sessionRestaurantId = sessionStorage.getItem('selected_restaurant_id');
+    if (sessionRestaurantId) {
+        return sessionRestaurantId;
+    }
+    
+    // Try to get from server session via AJAX if needed
+    return null; // Will use server session in the controller
+}
 
 // Forecast Chart with Confidence Intervals
 function initializeForecastChart() {
@@ -477,18 +520,52 @@ function refreshAISummary() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
     btn.disabled = true;
     
-    // Simulate API call to LLM service
-    setTimeout(() => {
-        summaryEl.innerHTML = 'Updated analysis: Traffic patterns show strong weekend performance with 18% increase vs weekdays. New promotion opportunities identified for Tuesday-Thursday slow periods. Kitchen efficiency improved by 12% this week.';
-        actionsEl.innerHTML = `
-            <li>Launch Tuesday Special untuk increase midweek traffic</li>
-            <li>Optimize staff schedule berdasarkan updated forecast</li>
-            <li>Test new combo pricing untuk boost AOV</li>
-            <li>Monitor inventory levels untuk weekend rush</li>
-        `;
+    // Get current restaurant selection
+    const restaurantId = getSelectedRestaurantId();
+    
+    // Make API call to generate new summary
+    fetch('/api/llm/summary', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            context: 'overview',
+            restaurant_id: restaurantId,
+            force_refresh: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.data) {
+            summaryEl.innerHTML = data.data.response;
+            
+            // Update action items
+            if (data.data.action_items && data.data.action_items.length > 0) {
+                const actionItemsHtml = data.data.action_items.map(item => `<li>${item}</li>`).join('');
+                actionsEl.innerHTML = actionItemsHtml;
+            }
+            
+            // Show cache status
+            if (data.data.cached) {
+                btn.title = 'Using cached result from ' + new Date(data.data.generated_at).toLocaleString();
+            } else {
+                btn.title = 'Generated at ' + new Date(data.data.generated_at).toLocaleString();
+            }
+        } else {
+            alert('Failed to refresh summary: ' + (data.message || 'Unknown error'));
+        }
+        
+        btn.innerHTML = '<i class="fas fa-sync me-1"></i>Refresh Summary ';
+        btn.disabled = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to refresh summary. Please try again.');
         btn.innerHTML = '<i class="fas fa-sync me-1"></i>Refresh Summary';
         btn.disabled = false;
-    }, 2000);
+    });
 }
 
 // Auto-refresh KPIs every 30 seconds

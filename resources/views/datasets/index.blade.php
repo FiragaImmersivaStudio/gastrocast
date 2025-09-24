@@ -4,7 +4,10 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Dataset Management</h1>
+    <div>
+        <h1>Dataset Management</h1>
+        <p class="text-muted mb-0">Kelola dan impor data untuk analisis restoran Anda. Gunakan fitur ini untuk mengupload data penjualan, menu, inventori, dan staff.</p>
+    </div>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
         <i class="fas fa-upload me-2"></i>Import Data
     </button>
@@ -17,7 +20,12 @@
                 <i class="fas fa-receipt fa-2x text-primary mb-2"></i>
                 <h5 class="card-title">Sales Data</h5>
                 <p class="text-muted">12,450 records</p>
-                <span class="badge bg-success">Up to date</span>
+                <span class="badge bg-success mb-2">Up to date</span>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadSample('sales')">
+                        <i class="fas fa-download me-1"></i>Download Sample
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -27,7 +35,12 @@
                 <i class="fas fa-users fa-2x text-info mb-2"></i>
                 <h5 class="card-title">Customer Data</h5>
                 <p class="text-muted">3,280 records</p>
-                <span class="badge bg-warning">Pending sync</span>
+                <span class="badge bg-warning mb-2">Pending sync</span>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-info" onclick="downloadSample('sales')">
+                        <i class="fas fa-download me-1"></i>Download Sample
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -37,7 +50,12 @@
                 <i class="fas fa-utensils fa-2x text-success mb-2"></i>
                 <h5 class="card-title">Menu Items</h5>
                 <p class="text-muted">156 items</p>
-                <span class="badge bg-success">Up to date</span>
+                <span class="badge bg-success mb-2">Up to date</span>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-success" onclick="downloadSample('menu')">
+                        <i class="fas fa-download me-1"></i>Download Sample
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -47,7 +65,12 @@
                 <i class="fas fa-boxes fa-2x text-warning mb-2"></i>
                 <h5 class="card-title">Inventory</h5>
                 <p class="text-muted">89 items</p>
-                <span class="badge bg-success">Up to date</span>
+                <span class="badge bg-success mb-2">Up to date</span>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-warning" onclick="downloadSample('inventory')">
+                        <i class="fas fa-download me-1"></i>Download Sample
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -146,6 +169,17 @@ function submitImport() {
     alert('Data import started! You will be notified when it completes.');
     $('#importModal').modal('hide');
     document.getElementById('importForm').reset();
+}
+
+function downloadSample(type) {
+    // Create a temporary anchor element to trigger download
+    const downloadUrl = `/api/sample-data/download/${type}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 @endpush
