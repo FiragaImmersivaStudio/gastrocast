@@ -61,6 +61,8 @@ Route::middleware(['web'])->group(function () {
         Route::get('/restaurants/{restaurant}/edit', [RestaurantController::class, 'edit'])->name('restaurants.edit');
         Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update'])->name('restaurants.update');
         Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->name('restaurants.destroy');
+        Route::post('/restaurants/{restaurant}/select', [RestaurantController::class, 'select'])->name('restaurants.select');
+        Route::post('/restaurants/deselect', [RestaurantController::class, 'deselect'])->name('restaurants.deselect');
         
         // Dataset management
         Route::get('/datasets', function () { return view('datasets.index'); })->name('datasets.index');

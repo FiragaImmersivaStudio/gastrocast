@@ -51,6 +51,8 @@ class RestaurantController extends Controller
             'is_active' => true,
         ]);
 
+        $restaurant->users()->attach(Auth::id());
+
         return redirect()->route('restaurants.index')
             ->with('success', 'Restaurant created successfully.');
     }
@@ -110,5 +112,41 @@ class RestaurantController extends Controller
 
         return redirect()->route('restaurants.index')
             ->with('success', 'Restaurant deleted successfully.');
+    }
+
+    /**
+     * Select a restaurant as the current active restaurant
+     */
+    public function select(Restaurant $restaurant)
+    {
+        $this->authorize('view', $restaurant);
+        
+        // Check if restaurant is active
+        if (!$restaurant->is_active) {
+            return redirect()->back()
+                ->with('error', 'Cannot select an inactive restaurant.');
+        }
+        
+        // Store the selected restaurant in session
+        session([
+            'selected_restaurant_id' => $restaurant->id,
+            'active_restaurant_name' => $restaurant->name
+        ]);
+
+        return redirect()->back()
+            ->with('success', "Restaurant '{$restaurant->name}' selected successfully.");
+    }
+
+    /**
+     * Deselect the current active restaurant
+     */
+    public function deselect()
+    {
+        $currentRestaurantName = session('active_restaurant_name', 'restaurant');
+        
+        session()->forget(['selected_restaurant_id', 'active_restaurant_name']);
+
+        return redirect()->back()
+            ->with('success', "Restaurant '{$currentRestaurantName}' deselected successfully.");
     }
 }

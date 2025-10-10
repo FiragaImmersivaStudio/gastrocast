@@ -89,6 +89,85 @@
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+        
+        .restaurant-selector .dropdown-toggle {
+            min-width: 200px;
+            text-align: left;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(122, 0, 31, 0.05) 0%, rgba(139, 0, 31, 0.1) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .restaurant-selector .dropdown-toggle:hover {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(122, 0, 31, 0.3);
+        }
+        
+        .restaurant-selector .dropdown-toggle.has-active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 6px rgba(122, 0, 31, 0.4);
+        }
+        
+        .restaurant-selector .dropdown-toggle.has-active:hover {
+            background: linear-gradient(135deg, #6B0018 0%, #7A001F 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(122, 0, 31, 0.5);
+        }
+        
+        .restaurant-active-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .restaurant-selector .dropdown-menu {
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 8px 16px rgba(122, 0, 31, 0.2);
+        }
+        
+        .restaurant-selector .dropdown-item {
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        
+        .restaurant-selector .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(122, 0, 31, 0.1) 0%, rgba(139, 0, 31, 0.15) 100%);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .restaurant-selector .dropdown-item.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%);
+            color: white;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .restaurant-selector .dropdown-item.active:hover {
+            background: linear-gradient(135deg, #6B0018 0%, var(--primary-color) 100%);
+            color: white;
+            transform: translateX(8px);
+        }
+        
+        .restaurant-selector .dropdown-item.text-warning:hover {
+            background: rgba(255, 193, 7, 0.1);
+            color: #d39e00;
+        }
+        
+        .restaurant-selector .dropdown-item.text-primary:hover {
+            background: linear-gradient(135deg, rgba(122, 0, 31, 0.1) 0%, rgba(139, 0, 31, 0.15) 100%);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -102,17 +181,53 @@
             <div class="d-flex align-items-center">
                 @auth
                     <!-- Restaurant Selector -->
-                    <div class="dropdown me-3">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="restaurantSelector" data-bs-toggle="dropdown">
+                    <div class="dropdown me-3 restaurant-selector">
+                        <button class="btn btn-outline-primary dropdown-toggle {{ isset($selectedRestaurant) && $selectedRestaurant ? 'has-active' : '' }}" type="button" id="restaurantSelector" data-bs-toggle="dropdown">
                             <i class="fas fa-store me-1"></i>
-                            {{ session('active_restaurant_name', 'Select Restaurant') }}
+                            @if(isset($selectedRestaurant) && $selectedRestaurant)
+                                <i class="fas fa-circle restaurant-active-indicator" style="font-size: 0.5rem; margin-right: 0.25rem; color: var(--accent-color);" title="Active Restaurant"></i>
+                                {{ $selectedRestaurant->name }}
+                            @else
+                                Select Restaurant
+                            @endif
                         </button>
                         <ul class="dropdown-menu">
-                            <!-- This would be populated dynamically -->
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-hamburger me-2"></i>The Gourmet Burger</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-pizza-slice me-2"></i>Pasta Paradise</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-plus me-2"></i>Add Restaurant</a></li>
+                            @if(isset($userRestaurants) && $userRestaurants && $userRestaurants->count() > 0)
+                                @foreach($userRestaurants as $restaurant)
+                                    <li>
+                                        <form method="POST" action="{{ route('restaurants.select', $restaurant) }}" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item {{ isset($selectedRestaurant) && $selectedRestaurant && $selectedRestaurant->id == $restaurant->id ? 'active' : '' }}">
+                                                <i class="fas fa-store me-2"></i>
+                                                {{ $restaurant->name }}
+                                                @if(isset($selectedRestaurant) && $selectedRestaurant && $selectedRestaurant->id == $restaurant->id)
+                                                    <i class="fas fa-check float-end mt-1" style="color: var(--accent-color);"></i>
+                                                @endif
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endforeach
+                                @if(isset($selectedRestaurant) && $selectedRestaurant)
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('restaurants.deselect') }}" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item text-warning">
+                                                <i class="fas fa-times me-2"></i>Deselect Restaurant
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endif
+                                <li><hr class="dropdown-divider"></li>
+                            @else
+                                <li><span class="dropdown-item-text text-muted"><i class="fas fa-info-circle me-2"></i>No restaurants found</span></li>
+                                <li><hr class="dropdown-divider"></li>
+                            @endif
+                            <li>
+                                <a class="dropdown-item text-primary" href="{{ route('restaurants.create') }}">
+                                    <i class="fas fa-plus me-2"></i>Add Restaurant
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     
@@ -228,6 +343,28 @@
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Flash Messages -->
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                
+                @if(session('warning'))
+                    <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ session('warning') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                
                 @yield('content')
             </main>
         </div>
@@ -244,6 +381,27 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
+        });
+        
+        // Restaurant selector handling
+        $(document).ready(function() {
+            // Add loading state to restaurant selection forms
+            $('.restaurant-selector form').on('submit', function() {
+                const $btn = $(this).find('button');
+                const originalText = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Selecting...');
+                
+                // Re-enable after a delay in case of error
+                setTimeout(function() {
+                    $btn.prop('disabled', false).html(originalText);
+                }, 5000);
+            });
+            
+            // Handle deselection
+            $('form[action*="deselect"]').on('submit', function() {
+                const $btn = $(this).find('button');
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Deselecting...');
+            });
         });
     </script>
     
