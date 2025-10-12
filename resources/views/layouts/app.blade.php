@@ -38,17 +38,34 @@
         }
         
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.8) !important;
             border-radius: 8px;
             margin: 2px 0;
             transition: all 0.3s ease;
         }
         
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
             transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            font-weight: 600;
+            transform: translateX(5px);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        /* Pastikan icons di sidebar juga memiliki kontras yang baik */
+        .sidebar .nav-link .fas {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .sidebar .nav-link:hover .fas,
+        .sidebar .nav-link.active .fas {
+            color: white !important;
         }
         
         .card {
@@ -100,6 +117,14 @@
             color: var(--primary-color);
             background: linear-gradient(135deg, rgba(122, 0, 31, 0.05) 0%, rgba(139, 0, 31, 0.1) 100%);
             transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .restaurant-selector .dropdown-toggle::after {
+            margin-left: auto;
+            flex-shrink: 0;
         }
         
         .restaurant-selector .dropdown-toggle:hover {
@@ -113,7 +138,7 @@
         .restaurant-selector .dropdown-toggle.has-active {
             background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%);
             border-color: var(--primary-color);
-            color: white;
+            color: white !important;
             box-shadow: 0 2px 6px rgba(122, 0, 31, 0.4);
         }
         
@@ -121,6 +146,40 @@
             background: linear-gradient(135deg, #6B0018 0%, #7A001F 100%);
             transform: translateY(-1px);
             box-shadow: 0 6px 12px rgba(122, 0, 31, 0.5);
+            color: white !important;
+        }
+        
+        /* Pastikan text dan icons di dalam restaurant selector yang aktif tetap putih */
+        .restaurant-selector .dropdown-toggle.has-active,
+        .restaurant-selector .dropdown-toggle.has-active:hover,
+        .restaurant-selector .dropdown-toggle.has-active:focus {
+            color: white !important;
+        }
+        
+        .restaurant-selector .dropdown-toggle.has-active .fas,
+        .restaurant-selector .dropdown-toggle.has-active:hover .fas,
+        .restaurant-selector .dropdown-toggle.has-active:focus .fas {
+            color: white !important;
+        }
+        
+        /* Override untuk btn-outline-primary yang memiliki kelas has-active */
+        .btn-outline-primary.has-active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .btn-outline-primary.has-active:hover {
+            background: linear-gradient(135deg, #6B0018 0%, #7A001F 100%) !important;
+            border-color: #6B0018 !important;
+            color: white !important;
+        }
+        
+        .btn-outline-primary.has-active:focus {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.5) !important;
         }
         
         .restaurant-active-indicator {
@@ -171,6 +230,404 @@
             color: var(--primary-color);
             font-weight: 600;
         }
+
+        /* Bootstrap Component Overrides untuk Primary Color */
+        
+        /* List Group */
+        .list-group-item.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .list-group-item-action {
+            color: #333 !important;
+            background-color: transparent !important;
+            border-color: rgba(0, 0, 0, 0.125) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .list-group-item-action:hover {
+            background-color: rgba(122, 0, 31, 0.08) !important;
+            color: var(--primary-color) !important;
+            border-color: rgba(122, 0, 31, 0.2) !important;
+            transform: translateX(3px);
+        }
+        
+        .list-group-item-action:focus {
+            background-color: rgba(122, 0, 31, 0.12) !important;
+            color: var(--primary-color) !important;
+            border-color: rgba(122, 0, 31, 0.3) !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.15) !important;
+        }
+        
+        .list-group-item-action.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .list-group-item-action.active:hover {
+            background-color: #6B0018 !important;
+            border-color: #6B0018 !important;
+            color: white !important;
+            transform: translateX(5px);
+        }
+        
+        /* List Group Item dengan Pills style */
+        .list-group-flush .list-group-item-action {
+            border-left: none !important;
+            border-right: none !important;
+            border-radius: 0 !important;
+        }
+        
+        .list-group-flush .list-group-item-action:first-child {
+            border-top: none !important;
+        }
+        
+        .list-group-flush .list-group-item-action:last-child {
+            border-bottom: none !important;
+        }
+        
+        /* Special styling untuk Settings page navigation */
+        .card .list-group-flush .list-group-item-action {
+            padding: 0.75rem 1rem !important;
+            margin: 1px 0 !important;
+            border-radius: 6px !important;
+            border: 1px solid transparent !important;
+        }
+        
+        .card .list-group-flush .list-group-item-action:hover {
+            background: linear-gradient(135deg, rgba(122, 0, 31, 0.08) 0%, rgba(122, 0, 31, 0.12) 100%) !important;
+            border-color: rgba(122, 0, 31, 0.2) !important;
+            box-shadow: 0 2px 4px rgba(122, 0, 31, 0.1) !important;
+        }
+        
+        .card .list-group-flush .list-group-item-action.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #8B001F 100%) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        .card .list-group-flush .list-group-item-action.active:hover {
+            background: linear-gradient(135deg, #6B0018 0%, #7A001F 100%) !important;
+            transform: translateX(5px);
+            box-shadow: 0 6px 12px rgba(122, 0, 31, 0.35) !important;
+        }
+        
+        /* Alert Primary */
+        .alert-primary {
+            color: #ffffff !important;
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .alert-primary .alert-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        /* Badge Primary */
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        /* Nav Pills */
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: rgba(122, 0, 31, 0.1) !important;
+            color: var(--primary-color) !important;
+        }
+        
+        /* Nav Tabs */
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color) !important;
+            border-color: transparent transparent var(--primary-color) !important;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color) !important;
+            border-color: transparent transparent rgba(122, 0, 31, 0.3) !important;
+        }
+        
+        /* Fix untuk text contrast pada nav yang aktif */
+        .nav-pills .nav-link.active,
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+        }
+        
+        .nav-pills .nav-link.active .fas,
+        .nav-tabs .nav-link.active .fas {
+            color: white !important;
+        }
+        
+        /* Pagination */
+        .pagination .page-link {
+            color: var(--primary-color) !important;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: rgba(122, 0, 31, 0.1) !important;
+            border-color: rgba(122, 0, 31, 0.3) !important;
+            color: var(--primary-color) !important;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .progress-bar.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        /* Links */
+        a {
+            color: var(--primary-color) !important;
+        }
+        
+        a:hover {
+            color: #6B0018 !important;
+        }
+        
+        /* Override untuk Links di dalam elemen dengan background primary */
+        .bg-primary a,
+        .card-header.bg-primary a,
+        .alert-primary a,
+        .btn-primary a,
+        .badge.bg-primary a,
+        .sidebar a {
+            color: white !important;
+        }
+        
+        .bg-primary a:hover,
+        .card-header.bg-primary a:hover,
+        .alert-primary a:hover,
+        .btn-primary a:hover,
+        .badge.bg-primary a:hover,
+        .sidebar a:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        /* Form Controls Focus */
+        .form-control:focus {
+            border-color: rgba(122, 0, 31, 0.5) !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        .form-select:focus {
+            border-color: rgba(122, 0, 31, 0.5) !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        /* Check and Radio */
+        .form-check-input:checked {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .form-check-input:focus {
+            border-color: rgba(122, 0, 31, 0.5) !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        /* Dropdown Active */
+        .dropdown-item.active,
+        .dropdown-item:active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Modal Header */
+        .modal-header {
+            border-bottom-color: rgba(122, 0, 31, 0.2) !important;
+        }
+        
+        /* Table */
+        .table-primary {
+            background-color: rgba(122, 0, 31, 0.1) !important;
+            border-color: rgba(122, 0, 31, 0.2) !important;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) > td.table-primary {
+            background-color: rgba(122, 0, 31, 0.05) !important;
+        }
+        
+        /* Accordion */
+        .accordion-button:not(.collapsed) {
+            color: var(--primary-color) !important;
+            background-color: rgba(122, 0, 31, 0.1) !important;
+            border-color: rgba(122, 0, 31, 0.2) !important;
+        }
+        
+        .accordion-button:focus {
+            border-color: rgba(122, 0, 31, 0.5) !important;
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        /* Card Header Primary */
+        .card-header.bg-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        /* Border Primary */
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        
+        /* Outline Button Primary */
+        .btn-outline-primary {
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .btn-outline-primary:focus {
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.5) !important;
+        }
+        
+        .btn-outline-primary.active,
+        .btn-outline-primary:active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Spinner dan Loading States */
+        .spinner-border.text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        /* Toast */
+        .toast-header.bg-primary {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb-item.active {
+            color: var(--primary-color) !important;
+        }
+        
+        /* Input Group */
+        .input-group-text.bg-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Close Button */
+        .btn-close:focus {
+            box-shadow: 0 0 0 0.2rem rgba(122, 0, 31, 0.25) !important;
+        }
+        
+        /* Tab Content */
+        .tab-content .tab-pane.active {
+            border-color: rgba(122, 0, 31, 0.2) !important;
+        }
+        
+        /* Card dengan Border Primary */
+        .card.border-primary {
+            border-color: var(--primary-color) !important;
+        }
+        
+        .card.border-primary .card-header {
+            background-color: rgba(122, 0, 31, 0.1) !important;
+            border-bottom-color: var(--primary-color) !important;
+            color: var(--primary-color) !important;
+        }
+        
+        /* Offcanvas */
+        .offcanvas-header.bg-primary {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Button Group */
+        .btn-group .btn.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Popover */
+        .popover-header.bg-primary {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Custom Range Slider */
+        .form-range::-webkit-slider-thumb {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .form-range::-moz-range-thumb {
+            background-color: var(--primary-color) !important;
+        }
+        
+        /* Select Multiple */
+        .form-select option:checked {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        /* Perbaikan kontras untuk text pada background primary */
+        .bg-primary,
+        .btn-primary,
+        .badge.bg-primary,
+        .alert-primary,
+        .list-group-item.active,
+        .dropdown-item.active,
+        .pagination .page-item.active .page-link,
+        .nav-pills .nav-link.active,
+        .progress-bar,
+        .card-header.bg-primary {
+            color: white !important;
+        }
+        
+        .bg-primary *,
+        .btn-primary *,
+        .badge.bg-primary *,
+        .alert-primary *,
+        .list-group-item.active *,
+        .dropdown-item.active *,
+        .pagination .page-item.active .page-link *,
+        .nav-pills .nav-link.active *,
+        .card-header.bg-primary * {
+            color: white !important;
+        }
+        
+        /* Pastikan icons dan small text juga kontras */
+        .bg-primary .fas,
+        .btn-primary .fas,
+        .badge.bg-primary .fas,
+        .alert-primary .fas,
+        .list-group-item.active .fas,
+        .dropdown-item.active .fas,
+        .pagination .page-item.active .page-link .fas,
+        .nav-pills .nav-link.active .fas,
+        .card-header.bg-primary .fas {
+            color: white !important;
+        }
     </style>
 
     @yield('styles')
@@ -190,7 +647,7 @@
                         <button class="btn btn-outline-primary dropdown-toggle {{ isset($selectedRestaurant) && $selectedRestaurant ? 'has-active' : '' }}" type="button" id="restaurantSelector" data-bs-toggle="dropdown">
                             <i class="fas fa-store me-1"></i>
                             @if(isset($selectedRestaurant) && $selectedRestaurant)
-                                <i class="fas fa-circle restaurant-active-indicator" style="font-size: 0.5rem; margin-right: 0.25rem; color: var(--accent-color);" title="Active Restaurant"></i>
+                                <i class="ms-1 restaurant-active-indicator" style="font-size: 0.5rem; margin-right: 0.25rem; color: var(--accent-color);" title="Active Restaurant"></i>
                                 {{ $selectedRestaurant->name }}
                             @else
                                 Select Restaurant
