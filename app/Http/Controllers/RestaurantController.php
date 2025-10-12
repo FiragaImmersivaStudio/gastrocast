@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class RestaurantController extends Controller
 {
@@ -13,7 +14,15 @@ class RestaurantController extends Controller
      */
     public function index()
     {
-        $restaurants = Auth::user()->restaurants()->with('owner')->paginate(10);
+        $user = Auth::user();
+        
+        // Get restaurants where user is owner OR is attached as a user
+        $restaurants = Restaurant::where(function($query) use ($user) {
+            $query->where('owner_user_id', $user->id)
+                  ->orWhereHas('users', function($q) use ($user) {
+                      $q->where('user_id', $user->id);
+                  });
+        })->with(['owner', 'users'])->paginate(10);
         
         return view('restaurants.index', compact('restaurants'));
     }
@@ -63,6 +72,8 @@ class RestaurantController extends Controller
     public function show(Restaurant $restaurant)
     {
         $this->authorize('view', $restaurant);
+        
+        $restaurant->load(['users', 'owner']);
         
         return view('restaurants.show', compact('restaurant'));
     }
@@ -148,5 +159,170 @@ class RestaurantController extends Controller
 
         return redirect()->back()
             ->with('success', "Restaurant '{$currentRestaurantName}' deselected successfully.");
+    }
+
+    /**
+     * Invite a user to the restaurant
+     */
+    public function inviteUser(Request $request, Restaurant $restaurant)
+    {
+        $this->authorize('update', $restaurant);
+
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'role' => 'required|in:manager,staff'
+        ]);
+
+        // Find the user by email
+        $user = \App\Models\User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return redirect()->back()
+                ->with('error', 'User with this email not found.');
+        }
+
+        // Check if user is already associated with this restaurant
+        if ($restaurant->users()->where('user_id', $user->id)->exists()) {
+            return redirect()->back()
+                ->with('error', 'User is already associated with this restaurant.');
+        }
+
+        // Add user to restaurant
+        $restaurant->users()->attach($user->id, [
+            'role' => $request->role,
+            'joined_at' => now()
+        ]);
+
+        return redirect()->back()
+            ->with('success', "User '{$user->name}' has been invited to '{$restaurant->name}' as {$request->role}.");
+    }
+
+    /**
+     * Remove a user from the restaurant
+     */
+    public function removeUser(Request $request, Restaurant $restaurant)
+    {
+        $this->authorize('update', $restaurant);
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $user = \App\Models\User::find($request->user_id);
+        
+        // Check if user is associated with this restaurant
+        if (!$restaurant->users()->where('user_id', $user->id)->exists()) {
+            return redirect()->back()
+                ->with('error', 'User is not associated with this restaurant.');
+        }
+
+        // Remove user from restaurant
+        $restaurant->users()->detach($user->id);
+
+        return redirect()->back()
+            ->with('success', "User '{$user->name}' has been removed from '{$restaurant->name}'.");
+    }
+
+    /**
+     * Check if user exists by email (AJAX endpoint)
+     */
+    public function checkUserExists(Request $request)
+    {
+        $email = $request->input('email');
+        
+        if (!$email) {
+            return response()->json(['exists' => false, 'message' => 'Email is required']);
+        }
+
+        $user = \App\Models\User::where('email', $email)->first();
+        
+        if ($user) {
+            return response()->json([
+                'exists' => true, 
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email
+                ]
+            ]);
+        }
+
+        return response()->json(['exists' => false, 'message' => 'User not found']);
+    }
+
+    /**
+     * Invite a user to the restaurant (AJAX endpoint)
+     */
+    public function inviteUserAjax(Request $request, Restaurant $restaurant)
+    {
+        try {
+            $this->authorize('update', $restaurant);
+
+            $request->validate([
+                'email' => 'required|email|exists:users,email',
+                'role' => 'required|in:manager,staff'
+            ]);
+
+            // Find the user by email
+            $user = \App\Models\User::where('email', $request->email)->first();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User with this email not found.'
+                ], 404);
+            }
+
+            // Check if user is the owner
+            if ($user->id === $restaurant->owner_user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The restaurant owner cannot be invited as a team member.'
+                ], 422);
+            }
+
+            // Check if user is already associated with this restaurant
+            if ($restaurant->users()->where('user_id', $user->id)->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is already associated with this restaurant.'
+                ], 422);
+            }
+
+            // Add user to restaurant
+            $restaurant->users()->attach($user->id, [
+                'role' => $request->role,
+                'joined_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "User '{$user->name}' has been invited to '{$restaurant->name}' as {$request->role}.",
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $request->role,
+                    'joined_at' => now()->format('M j, Y')
+                ]
+            ]);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to invite users to this restaurant.'
+            ], 403);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error inviting user: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again.'
+            ], 500);
+        }
     }
 }

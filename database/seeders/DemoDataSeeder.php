@@ -30,6 +30,22 @@ class DemoDataSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        // demo2
+        $user2 = User::create([
+            'name' => 'Demo User 2',
+            'email' => 'demo2@custicast.com',
+            'password' => Hash::make('demo123'),
+            'email_verified_at' => now(),
+        ]);
+
+        // demo3
+        $user3 = User::create([
+            'name' => 'Demo User 3',
+            'email' => 'demo3@custicast.com',
+            'password' => Hash::make('demo123'),
+            'email_verified_at' => now(),
+        ]);
+
         // Create demo restaurants
         $restaurant1 = Restaurant::create([
             'owner_user_id' => $user->id,

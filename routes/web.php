@@ -63,6 +63,12 @@ Route::middleware(['web'])->group(function () {
         Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->name('restaurants.destroy');
         Route::post('/restaurants/{restaurant}/select', [RestaurantController::class, 'select'])->name('restaurants.select');
         Route::post('/restaurants/deselect', [RestaurantController::class, 'deselect'])->name('restaurants.deselect');
+        Route::post('/restaurants/{restaurant}/invite', [RestaurantController::class, 'inviteUser'])->name('restaurants.invite');
+        Route::delete('/restaurants/{restaurant}/remove-user', [RestaurantController::class, 'removeUser'])->name('restaurants.remove-user');
+        
+        // AJAX endpoints for restaurant management
+        Route::post('/api/check-user-exists', [RestaurantController::class, 'checkUserExists'])->name('api.check-user-exists');
+        Route::post('/api/restaurants/{restaurant}/invite-ajax', [RestaurantController::class, 'inviteUserAjax'])->name('api.restaurants.invite-ajax');
         
         // Dataset management
         Route::get('/datasets', function () { return view('datasets.index'); })->name('datasets.index');
