@@ -3,7 +3,7 @@
 @section('title', 'Inventory & Waste Management')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Inventory & Waste Management</h1>
     <div>
         <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addItemModal">

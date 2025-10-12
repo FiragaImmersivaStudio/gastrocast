@@ -3,7 +3,7 @@
 @section('title', 'Promotions')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Promotions & Marketing</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPromotionModal">
         <i class="fas fa-plus me-2"></i>Create Promotion

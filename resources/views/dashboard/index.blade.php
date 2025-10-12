@@ -5,8 +5,8 @@
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-0 text-primary">
-                <i class="fas fa-tachometer-alt me-2"></i>Overview Dashboard
+            <h1>
+                Overview Dashboard
             </h1>
             <p class="text-muted mb-0">Real-time insights and analytics for your restaurant operations</p>
         </div>

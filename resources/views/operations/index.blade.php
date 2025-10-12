@@ -3,7 +3,7 @@
 @section('title', 'Operations Monitor')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Operations Monitor</h1>
     <div>
         <button class="btn btn-outline-secondary me-2">

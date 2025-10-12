@@ -3,7 +3,7 @@
 @section('title', 'What-If Lab')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>What-If Lab</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newScenarioModal">
         <i class="fas fa-flask me-2"></i>Create Scenario

@@ -3,7 +3,7 @@
 @section('title', 'Menu Engineering')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Menu Engineering</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#analyzeMenuModal">
         <i class="fas fa-calculator me-2"></i>Analyze Menu

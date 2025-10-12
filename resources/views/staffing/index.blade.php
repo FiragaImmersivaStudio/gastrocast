@@ -3,7 +3,7 @@
 @section('title', 'Staffing Planner')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Staffing Planner</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scheduleModal">
         <i class="fas fa-calendar-plus me-2"></i>Create Schedule

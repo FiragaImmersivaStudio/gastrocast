@@ -3,7 +3,7 @@
 @section('title', 'Reports & Export')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>Reports & Export</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">
         <i class="fas fa-file-alt me-2"></i>Generate Report

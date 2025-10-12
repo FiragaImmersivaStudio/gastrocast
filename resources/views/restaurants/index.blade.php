@@ -3,7 +3,7 @@
 @section('title', 'Restaurants')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1>My Restaurants</h1>
     <a href="{{ route('restaurants.create') }}" class="btn btn-primary">
         <i class="fas fa-plus me-2"></i>Add New Restaurant
