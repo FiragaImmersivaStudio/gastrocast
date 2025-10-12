@@ -921,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.downloadBackupCodes = function() {
         if (!window.backupCodes) return;
         
-        const content = 'GastroCast Two-Factor Authentication Backup Codes\n' +
+        const content = config('app.name', 'GastroCast') . ' Two-Factor Authentication Backup Codes\n' +
                        'Generated: ' + new Date().toLocaleString() + '\n\n' +
                        'Keep these codes safe. Each code can only be used once.\n\n' +
                        window.backupCodes.join('\n');
@@ -930,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'gastrocast-2fa-backup-codes.txt';
+        a.download = '{{ strtolower(preg_replace('/[^a-zA-Z0-9]/', '', config('app.name', 'gastrocast'))) }}-2fa-backup-codes.txt';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
