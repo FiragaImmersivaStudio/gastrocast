@@ -162,7 +162,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function submitImport() {
     // Simulate import process
@@ -182,4 +182,4 @@ function downloadSample(type) {
     document.body.removeChild(link);
 }
 </script>
-@endpush
+@endsection

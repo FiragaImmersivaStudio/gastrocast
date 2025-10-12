@@ -302,7 +302,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function generateQuickReport(type) {
     alert(`Generating ${type} report... You'll receive an email when it's ready.`);
@@ -346,4 +346,4 @@ function deleteSchedule(id) {
     }
 }
 </script>
-@endpush
+@endsection

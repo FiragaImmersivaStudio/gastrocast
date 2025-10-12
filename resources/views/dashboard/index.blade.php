@@ -269,7 +269,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 // Initialize Charts
 document.addEventListener('DOMContentLoaded', function() {
@@ -576,4 +576,4 @@ setInterval(function() {
     document.getElementById('kpi-gmv').textContent = '$' + (18000 + Math.floor(Math.random() * 2000)).toLocaleString();
 }, 30000);
 </script>
-@endpush
+@endsection

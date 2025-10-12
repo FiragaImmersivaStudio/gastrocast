@@ -346,7 +346,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Staffing Chart
@@ -409,4 +409,4 @@ function createSchedule() {
     font-size: 12px;
 }
 </style>
-@endpush
+@endsection

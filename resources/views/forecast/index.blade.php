@@ -217,7 +217,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Initialize forecast chart
@@ -268,4 +268,4 @@ function runForecast() {
     document.getElementById('forecastForm').reset();
 }
 </script>
-@endpush
+@endsection

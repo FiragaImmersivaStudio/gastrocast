@@ -132,7 +132,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function selectRestaurant(restaurantId) {
     // Make AJAX call to select restaurant
@@ -165,4 +165,4 @@ function confirmDelete(restaurantId, restaurantName) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>
-@endpush
+@endsection

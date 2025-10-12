@@ -109,7 +109,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function confirmDelete(restaurantId, restaurantName) {
     document.getElementById('restaurantName').textContent = restaurantName;
@@ -117,4 +117,4 @@ function confirmDelete(restaurantId, restaurantName) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>
-@endpush
+@endsection

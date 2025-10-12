@@ -330,7 +330,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Order Volume Chart
@@ -406,4 +406,4 @@ setInterval(function() {
     }
 }, 30000);
 </script>
-@endpush
+@endsection

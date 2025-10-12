@@ -300,7 +300,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function addItem() {
     alert('Item added successfully!');
@@ -314,4 +314,4 @@ function recordWaste() {
     document.getElementById('wasteForm').reset();
 }
 </script>
-@endpush
+@endsection

@@ -364,7 +364,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Promotion Performance Chart
@@ -451,4 +451,4 @@ function duplicatePromotion(id) {
     alert(`Duplicating promotion ${id}`);
 }
 </script>
-@endpush
+@endsection

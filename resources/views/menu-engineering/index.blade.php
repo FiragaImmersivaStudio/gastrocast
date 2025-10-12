@@ -337,7 +337,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 document.getElementById('analysisPeriod').addEventListener('change', function() {
     const customRange = document.getElementById('customRange');
@@ -353,4 +353,4 @@ function runAnalysis() {
     $('#analyzeMenuModal').modal('hide');
 }
 </script>
-@endpush
+@endsection

@@ -213,7 +213,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Initialize scenario comparison chart
@@ -268,4 +268,4 @@ function editScenario(id) {
     alert(`Opening scenario ${id} for editing`);
 }
 </script>
-@endpush
+@endsection
