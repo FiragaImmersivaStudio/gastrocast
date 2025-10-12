@@ -92,7 +92,15 @@ Route::middleware(['web'])->group(function () {
         Route::get('/reports', function () { return view('reports.index'); })->name('reports.index');
         
         // Settings
-        Route::get('/settings', function () { return view('settings.index'); })->name('settings.index');
+        Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::post('/settings/restaurant', [App\Http\Controllers\SettingsController::class, 'updateRestaurant'])->name('settings.restaurant.update');
+        Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+        Route::post('/settings/password', [App\Http\Controllers\SettingsController::class, 'changePassword'])->name('settings.password.change');
+        Route::post('/settings/2fa/enable', [App\Http\Controllers\SettingsController::class, 'enable2FA'])->name('settings.2fa.enable');
+        Route::post('/settings/2fa/verify', [App\Http\Controllers\SettingsController::class, 'verify2FA'])->name('settings.2fa.verify');
+        Route::post('/settings/2fa/disable', [App\Http\Controllers\SettingsController::class, 'disable2FA'])->name('settings.2fa.disable');
+        Route::post('/settings/account/delete', [App\Http\Controllers\SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
     });
 
     // API-like endpoints (AJAX) - staying in web.php as requested

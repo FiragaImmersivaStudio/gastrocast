@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reports & Export - GastroCast')
+@section('title', 'Reports & Export')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">

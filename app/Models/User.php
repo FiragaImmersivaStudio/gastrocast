@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -20,8 +21,18 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'phone',
+        'timezone',
+        'notification_forecast_ready',
+        'notification_system_updates',
+        'notification_forecast_next_month',
+        'two_factor_secret',
+        'two_factor_enabled',
+        'deletion_requested_at',
     ];
 
     /**
@@ -42,6 +53,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'notification_forecast_ready' => 'boolean',
+        'notification_system_updates' => 'boolean',
+        'notification_forecast_next_month' => 'boolean',
+        'two_factor_enabled' => 'boolean',
+        'deleted_at' => 'datetime',
+        'deletion_requested_at' => 'datetime',
     ];
 
     /**
@@ -77,5 +94,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $pivot = $this->restaurants()->where('restaurant_id', $restaurantId)->first()?->pivot;
         return $pivot?->role;
+    }
+
+    /**
+     * User's invoices
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

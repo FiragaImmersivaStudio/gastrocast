@@ -17,6 +17,7 @@ class Restaurant extends Model
         'phone',
         'email',
         'timezone',
+        'currency',
         'operating_hours',
         'is_active',
     ];

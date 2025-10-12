@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'CustiCast') }} - Restaurant Intelligence Platform</title>
+    <title>@hasSection('title')
+        @yield('title') - {{ config('app.name', 'CustiCast') }}
+        @else{{ config('app.name', 'CustiCast') }} - Restaurant Intelligence Platform
+        @endif</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -169,6 +172,8 @@
             font-weight: 600;
         }
     </style>
+
+    @yield('styles')
 </head>
 <body class="bg-light">
     <!-- Navigation -->
@@ -404,7 +409,7 @@
             });
         });
     </script>
-    
-    @stack('scripts')
+
+    @yield('scripts')
 </body>
 </html>

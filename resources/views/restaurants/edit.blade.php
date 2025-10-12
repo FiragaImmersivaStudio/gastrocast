@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit ' . $restaurant->name . ' - GastroCast')
+@section('title', 'Edit ' . $restaurant->name . '')
 
 @section('content')
 <div class="row justify-content-center">
