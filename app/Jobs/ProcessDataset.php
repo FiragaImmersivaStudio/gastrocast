@@ -3,18 +3,18 @@
 namespace App\Jobs;
 
 use App\Models\Dataset;
+use App\Models\InventoryItem;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\MenuItem;
-use App\Models\InventoryItem;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProcessDataset implements ShouldQueue
 {
@@ -43,19 +43,19 @@ class ProcessDataset implements ShouldQueue
         try {
             Log::info("Processing dataset {$this->dataset->id} of type {$this->dataset->type}");
 
-            $filePath = storage_path('app/' . $this->dataset->file_path);
-            
-            if (!file_exists($filePath)) {
+            $filePath = storage_path('app/'.$this->dataset->file_path);
+
+            if (! file_exists($filePath)) {
                 throw new \Exception('Dataset file not found');
             }
 
             $spreadsheet = IOFactory::load($filePath);
             $worksheet = $spreadsheet->getActiveSheet();
             $data = $worksheet->toArray();
-            
+
             // Remove header row
             $headers = array_shift($data);
-            
+
             // Process based on type
             switch ($this->dataset->type) {
                 case 'sales':
@@ -76,17 +76,17 @@ class ProcessDataset implements ShouldQueue
             $this->dataset->update([
                 'status' => 'completed',
                 'processed_at' => now(),
-                'processing_notes' => 'Successfully processed ' . count($data) . ' records'
+                'processing_notes' => 'Successfully processed '.count($data).' records',
             ]);
 
             Log::info("Dataset {$this->dataset->id} processed successfully");
 
         } catch (\Exception $e) {
-            Log::error("Failed to process dataset {$this->dataset->id}: " . $e->getMessage());
-            
+            Log::error("Failed to process dataset {$this->dataset->id}: ".$e->getMessage());
+
             $this->dataset->update([
                 'status' => 'failed',
-                'validation_errors' => $e->getMessage()
+                'validation_errors' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -101,7 +101,9 @@ class ProcessDataset implements ShouldQueue
         DB::beginTransaction();
         try {
             foreach ($data as $row) {
-                if (empty($row[0])) continue; // Skip empty rows
+                if (empty($row[0])) {
+                    continue;
+                } // Skip empty rows
 
                 // Check if order already exists
                 $existingOrder = Order::where('restaurant_id', $this->dataset->restaurant_id)
@@ -129,7 +131,7 @@ class ProcessDataset implements ShouldQueue
                 $menuItem = MenuItem::firstOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[4]
+                        'name' => $row[4],
                     ],
                     [
                         'category_id' => null,
@@ -163,12 +165,14 @@ class ProcessDataset implements ShouldQueue
         DB::beginTransaction();
         try {
             foreach ($data as $row) {
-                if (empty($row[0])) continue;
+                if (empty($row[0])) {
+                    continue;
+                }
 
                 MenuItem::updateOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[1]
+                        'name' => $row[1],
                     ],
                     [
                         'category_id' => null, // Would need to map category
@@ -196,12 +200,14 @@ class ProcessDataset implements ShouldQueue
         DB::beginTransaction();
         try {
             foreach ($data as $row) {
-                if (empty($row[0])) continue;
+                if (empty($row[0])) {
+                    continue;
+                }
 
                 InventoryItem::updateOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[0]
+                        'name' => $row[0],
                     ],
                     [
                         'category' => $row[1] ?? 'General',
@@ -228,7 +234,7 @@ class ProcessDataset implements ShouldQueue
     private function processCustomerData($data)
     {
         // For now, we'll just log this as we don't have a Customer model yet
-        Log::info("Customer data processing not yet implemented. Records: " . count($data));
+        Log::info('Customer data processing not yet implemented. Records: '.count($data));
     }
 
     /**
@@ -236,11 +242,11 @@ class ProcessDataset implements ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
-        Log::error("Dataset processing job failed: " . $exception->getMessage());
-        
+        Log::error('Dataset processing job failed: '.$exception->getMessage());
+
         $this->dataset->update([
             'status' => 'failed',
-            'validation_errors' => $exception->getMessage()
+            'validation_errors' => $exception->getMessage(),
         ]);
     }
 }

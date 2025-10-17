@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Dataset;
 use App\Jobs\ProcessDataset;
+use App\Models\Dataset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -19,8 +19,8 @@ class DatasetController extends Controller
     public function index()
     {
         $restaurantId = session('selected_restaurant_id');
-        
-        if (!$restaurantId) {
+
+        if (! $restaurantId) {
             return redirect()->route('dashboard')->with('error', 'Please select a restaurant first');
         }
 
@@ -43,7 +43,7 @@ class DatasetController extends Controller
         ]);
 
         $restaurantId = session('selected_restaurant_id');
-        if (!$restaurantId) {
+        if (! $restaurantId) {
             return response()->json(['error' => 'No restaurant selected'], 400);
         }
 
@@ -53,16 +53,16 @@ class DatasetController extends Controller
         try {
             // Validate the file structure
             $validationResult = $this->validateDatasetStructure($file, $type);
-            
-            if (!$validationResult['valid']) {
+
+            if (! $validationResult['valid']) {
                 return response()->json([
                     'error' => 'Invalid file structure',
-                    'details' => $validationResult['errors']
+                    'details' => $validationResult['errors'],
                 ], 422);
             }
 
             // Store the file
-            $filename = $type . '_' . time() . '_' . $file->getClientOriginalName();
+            $filename = $type.'_'.time().'_'.$file->getClientOriginalName();
             $path = $file->storeAs('datasets', $filename, 'local');
 
             // Create dataset record
@@ -81,13 +81,13 @@ class DatasetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Dataset uploaded successfully',
-                'dataset' => $dataset
+                'dataset' => $dataset,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to upload dataset',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -98,16 +98,16 @@ class DatasetController extends Controller
     public function process($id)
     {
         $dataset = Dataset::findOrFail($id);
-        
+
         // Verify ownership
         if ($dataset->restaurant_id != session('selected_restaurant_id')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        if (!$dataset->canBeProcessed()) {
+        if (! $dataset->canBeProcessed()) {
             return response()->json([
                 'error' => 'Dataset cannot be processed',
-                'status' => $dataset->status
+                'status' => $dataset->status,
             ], 400);
         }
 
@@ -119,7 +119,7 @@ class DatasetController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Dataset processing started'
+            'message' => 'Dataset processing started',
         ]);
     }
 
@@ -129,7 +129,7 @@ class DatasetController extends Controller
     public function show($id)
     {
         $dataset = Dataset::with('uploadedBy', 'restaurant')->findOrFail($id);
-        
+
         // Verify ownership
         if ($dataset->restaurant_id != session('selected_restaurant_id')) {
             if (request()->wantsJson()) {
@@ -159,7 +159,7 @@ class DatasetController extends Controller
     public function destroy($id)
     {
         $dataset = Dataset::findOrFail($id);
-        
+
         // Verify ownership
         if ($dataset->restaurant_id != session('selected_restaurant_id')) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -175,7 +175,7 @@ class DatasetController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Dataset deleted successfully'
+            'message' => 'Dataset deleted successfully',
         ]);
     }
 
@@ -184,7 +184,7 @@ class DatasetController extends Controller
      */
     public function downloadTemplate($type)
     {
-        if (!in_array($type, ['sales', 'customers', 'menu', 'inventory'])) {
+        if (! in_array($type, ['sales', 'customers', 'menu', 'inventory'])) {
             abort(404);
         }
 
@@ -213,14 +213,14 @@ class DatasetController extends Controller
             $headers = array_filter($headers); // Remove empty values
 
             $expectedHeaders = $this->getExpectedHeaders($type);
-            
+
             // Check if all expected headers are present
             $missingHeaders = array_diff($expectedHeaders, $headers);
-            
-            if (!empty($missingHeaders)) {
+
+            if (! empty($missingHeaders)) {
                 return [
                     'valid' => false,
-                    'errors' => ['Missing columns: ' . implode(', ', $missingHeaders)]
+                    'errors' => ['Missing columns: '.implode(', ', $missingHeaders)],
                 ];
             }
 
@@ -234,13 +234,13 @@ class DatasetController extends Controller
                 'valid' => true,
                 'total_records' => $totalRecords,
                 'start_date' => $dateRange['start'],
-                'end_date' => $dateRange['end']
+                'end_date' => $dateRange['end'],
             ];
 
         } catch (\Exception $e) {
             return [
                 'valid' => false,
-                'errors' => ['Failed to read file: ' . $e->getMessage()]
+                'errors' => ['Failed to read file: '.$e->getMessage()],
             ];
         }
     }
@@ -267,10 +267,10 @@ class DatasetController extends Controller
     {
         $dateColumn = $type === 'customers' ? 'E' : ($type === 'inventory' ? 'H' : 'B'); // registration_date, last_updated, or date
         $highestRow = $worksheet->getHighestRow();
-        
+
         $dates = [];
         for ($row = 2; $row <= min($highestRow, 1000); $row++) { // Check max 1000 rows
-            $dateValue = $worksheet->getCell($dateColumn . $row)->getValue();
+            $dateValue = $worksheet->getCell($dateColumn.$row)->getValue();
             if ($dateValue) {
                 try {
                     $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateValue);
@@ -290,9 +290,10 @@ class DatasetController extends Controller
         }
 
         sort($dates);
+
         return [
             'start' => reset($dates)->format('Y-m-d'),
-            'end' => end($dates)->format('Y-m-d')
+            'end' => end($dates)->format('Y-m-d'),
         ];
     }
 
@@ -301,22 +302,22 @@ class DatasetController extends Controller
      */
     private function createTemplate($type)
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         $headers = $this->getExpectedHeaders($type);
         $examples = $this->getExampleData($type);
 
         // Set headers
         foreach ($headers as $index => $header) {
-            $sheet->setCellValue(chr(65 + $index) . '1', $header);
-            $sheet->getStyle(chr(65 + $index) . '1')->getFont()->setBold(true);
+            $sheet->setCellValue(chr(65 + $index).'1', $header);
+            $sheet->getStyle(chr(65 + $index).'1')->getFont()->setBold(true);
         }
 
         // Add example rows
         foreach ($examples as $rowIndex => $example) {
             foreach ($example as $colIndex => $value) {
-                $sheet->setCellValue(chr(65 + $colIndex) . ($rowIndex + 2), $value);
+                $sheet->setCellValue(chr(65 + $colIndex).($rowIndex + 2), $value);
             }
         }
 
@@ -361,21 +362,21 @@ class DatasetController extends Controller
     private function getDatasetPreview($dataset)
     {
         try {
-            $filePath = storage_path('app/' . $dataset->file_path);
-            
-            if (!file_exists($filePath)) {
+            $filePath = storage_path('app/'.$dataset->file_path);
+
+            if (! file_exists($filePath)) {
                 return ['error' => 'File not found'];
             }
 
             $spreadsheet = IOFactory::load($filePath);
             $worksheet = $spreadsheet->getActiveSheet();
-            
+
             // Get first 10 rows as preview
             $preview = $worksheet->rangeToArray('A1:Z11');
-            
+
             return [
                 'headers' => array_filter($preview[0]),
-                'rows' => array_slice($preview, 1, 10)
+                'rows' => array_slice($preview, 1, 10),
             ];
 
         } catch (\Exception $e) {
