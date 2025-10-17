@@ -71,7 +71,12 @@ Route::middleware(['web'])->group(function () {
         Route::post('/api/restaurants/{restaurant}/invite-ajax', [RestaurantController::class, 'inviteUserAjax'])->name('api.restaurants.invite-ajax');
         
         // Dataset management
-        Route::get('/datasets', function () { return view('datasets.index'); })->name('datasets.index');
+        Route::get('/datasets', [App\Http\Controllers\DatasetController::class, 'index'])->name('datasets.index');
+        Route::post('/datasets/upload', [App\Http\Controllers\DatasetController::class, 'upload'])->name('datasets.upload');
+        Route::post('/datasets/{id}/process', [App\Http\Controllers\DatasetController::class, 'process'])->name('datasets.process');
+        Route::get('/datasets/{id}', [App\Http\Controllers\DatasetController::class, 'show'])->name('datasets.show');
+        Route::delete('/datasets/{id}', [App\Http\Controllers\DatasetController::class, 'destroy'])->name('datasets.destroy');
+        Route::get('/datasets/template/{type}', [App\Http\Controllers\DatasetController::class, 'downloadTemplate'])->name('datasets.template');
         
         // Forecast & Insights
         Route::get('/forecast', function () { return view('forecast.index'); })->name('forecast.index');
