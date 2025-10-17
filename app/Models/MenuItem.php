@@ -12,19 +12,24 @@ class MenuItem extends Model
     protected $fillable = [
         'restaurant_id',
         'category_id',
+        'sku',
         'name',
         'description',
         'price',
-        'cost',
+        'cogs',
         'is_active',
         'prep_time_minutes',
+        'allergens',
+        'nutrition_info',
         'dataset_id',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'cost' => 'decimal:2',
+        'cogs' => 'decimal:2',
         'is_active' => 'boolean',
+        'allergens' => 'array',
+        'nutrition_info' => 'array',
     ];
 
     public function restaurant()

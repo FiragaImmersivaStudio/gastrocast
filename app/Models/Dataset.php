@@ -47,6 +47,30 @@ class Dataset extends Model
     }
 
     /**
+     * Get orders imported from this dataset
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get menu items imported from this dataset
+     */
+    public function menuItems()
+    {
+        return $this->hasMany(MenuItem::class);
+    }
+
+    /**
+     * Get inventory items imported from this dataset
+     */
+    public function inventoryItems()
+    {
+        return $this->hasMany(InventoryItem::class);
+    }
+
+    /**
      * Check if dataset is processing
      */
     public function isProcessing()
@@ -75,6 +99,33 @@ class Dataset extends Model
      */
     public function canBeProcessed()
     {
-        return $this->status === 'uploaded';
+        return in_array($this->status, ['uploaded', 'failed']);
+    }
+
+    /**
+     * Reset dataset for reprocessing
+     */
+    public function resetForReprocessing()
+    {
+        $this->update([
+            'status' => 'uploaded',
+            'validation_errors' => null,
+            'processing_notes' => null,
+            'processed_at' => null,
+        ]);
+    }
+
+    /**
+     * Get status badge class for UI
+     */
+    public function getStatusBadgeClass()
+    {
+        return match($this->status) {
+            'uploaded' => 'bg-blue-100 text-blue-800',
+            'processing' => 'bg-yellow-100 text-yellow-800', 
+            'completed' => 'bg-green-100 text-green-800',
+            'failed' => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
     }
 }

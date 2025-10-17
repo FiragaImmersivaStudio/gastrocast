@@ -11,19 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add dataset_id to orders table
+        // Add dataset_id and payment_method to orders table
         Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('dataset_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('dataset_id')->nullable();
+            $table->string('payment_method')->default('cash');
+            $table->foreign('dataset_id')->references('id')->on('datasets')->onDelete('set null');
         });
 
         // Add dataset_id to menu_items table
         Schema::table('menu_items', function (Blueprint $table) {
-            $table->foreignId('dataset_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('dataset_id')->nullable();
+            $table->foreign('dataset_id')->references('id')->on('datasets')->onDelete('set null');
         });
 
         // Add dataset_id to inventory_items table
         Schema::table('inventory_items', function (Blueprint $table) {
-            $table->foreignId('dataset_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('dataset_id')->nullable();
+            $table->foreign('dataset_id')->references('id')->on('datasets')->onDelete('set null');
         });
     }
 
@@ -34,7 +38,7 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             $table->dropForeign(['dataset_id']);
-            $table->dropColumn('dataset_id');
+            $table->dropColumn(['dataset_id', 'payment_method']);
         });
 
         Schema::table('menu_items', function (Blueprint $table) {

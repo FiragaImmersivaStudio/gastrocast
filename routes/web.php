@@ -75,6 +75,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/datasets', [DatasetController::class, 'index'])->name('datasets.index');
         Route::post('/datasets/upload', [DatasetController::class, 'upload'])->name('datasets.upload');
         Route::post('/datasets/{id}/process', [DatasetController::class, 'process'])->name('datasets.process');
+        Route::get('/datasets/{id}/status', [DatasetController::class, 'status'])->name('datasets.status');
         Route::get('/datasets/{id}', [DatasetController::class, 'show'])->name('datasets.show');
         Route::delete('/datasets/{id}', [DatasetController::class, 'destroy'])->name('datasets.destroy');
         Route::get('/datasets/template/{type}', [DatasetController::class, 'downloadTemplate'])->name('datasets.template');

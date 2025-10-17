@@ -107,21 +107,24 @@ class ProcessDataset implements ShouldQueue
 
                 // Check if order already exists
                 $existingOrder = Order::where('restaurant_id', $this->dataset->restaurant_id)
-                    ->where('order_number', $row[0])
+                    ->where('order_no', $row[0])
                     ->first();
 
                 if ($existingOrder) {
                     continue; // Skip duplicates
                 }
 
+                // Parse and format datetime properly
+                $orderDateTime = $this->parseDateTime($row[1] ?? null, $row[2] ?? null);
+
                 // Create order
                 $order = Order::create([
                     'restaurant_id' => $this->dataset->restaurant_id,
-                    'order_number' => $row[0],
+                    'order_no' => $row[0],
                     'customer_name' => $row[3] ?? 'Guest',
-                    'order_date' => $row[1] ?? now(),
-                    'order_time' => $row[2] ?? now()->format('H:i:s'),
-                    'total_amount' => $row[7] ?? 0,
+                    'order_dt' => $orderDateTime,
+                    'gross_amount' => $row[7] ?? 0,
+                    'net_amount' => $row[7] ?? 0,
                     'payment_method' => $row[8] ?? 'cash',
                     'status' => $row[9] ?? 'completed',
                     'dataset_id' => $this->dataset->id,
@@ -134,10 +137,12 @@ class ProcessDataset implements ShouldQueue
                         'name' => $row[4],
                     ],
                     [
+                        'sku' => 'AUTO_' . strtoupper(str_replace(' ', '_', $row[4])),
                         'category_id' => null,
                         'price' => $row[6] ?? 0,
-                        'cost' => 0,
+                        'cogs' => 0,
                         'is_active' => true,
+                        'dataset_id' => $this->dataset->id,
                     ]
                 );
 
@@ -145,9 +150,9 @@ class ProcessDataset implements ShouldQueue
                 OrderItem::create([
                     'order_id' => $order->id,
                     'menu_item_id' => $menuItem->id,
-                    'quantity' => $row[5] ?? 1,
+                    'qty' => $row[5] ?? 1,
                     'unit_price' => $row[6] ?? 0,
-                    'subtotal' => $row[7] ?? 0,
+                    'line_total' => $row[7] ?? 0,
                 ]);
             }
             DB::commit();
@@ -172,15 +177,16 @@ class ProcessDataset implements ShouldQueue
                 MenuItem::updateOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[1],
+                        'sku' => $row[0],
                     ],
                     [
-                        'category_id' => null, // Would need to map category
+                        'name' => $row[1],
+                        'category_id' => null, // Would need to map category from $row[2]
                         'description' => $row[3] ?? '',
                         'price' => $row[4] ?? 0,
-                        'cost' => $row[5] ?? 0,
+                        'cogs' => $row[5] ?? 0,
                         'is_active' => ($row[6] ?? 'active') === 'active',
-                        'prep_time_minutes' => $row[8] ?? null,
+                        'prep_time_minutes' => $row[8] ?? 0,
                         'dataset_id' => $this->dataset->id,
                     ]
                 );
@@ -207,16 +213,17 @@ class ProcessDataset implements ShouldQueue
                 InventoryItem::updateOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[0],
+                        'sku' => 'INV_' . strtoupper(str_replace(' ', '_', $row[0])),
                     ],
                     [
-                        'category' => $row[1] ?? 'General',
-                        'unit' => $row[2] ?? 'unit',
+                        'name' => $row[0],
+                        'description' => $row[1] ?? 'General',
+                        'uom' => $row[2] ?? 'unit',
                         'current_stock' => $row[3] ?? 0,
-                        'minimum_stock' => $row[4] ?? 0,
+                        'safety_stock' => $row[4] ?? 0,
                         'unit_cost' => $row[5] ?? 0,
                         'supplier' => $row[6] ?? null,
-                        'last_updated' => $row[7] ?? now(),
+                        'is_active' => true,
                         'dataset_id' => $this->dataset->id,
                     ]
                 );
@@ -235,6 +242,75 @@ class ProcessDataset implements ShouldQueue
     {
         // For now, we'll just log this as we don't have a Customer model yet
         Log::info('Customer data processing not yet implemented. Records: '.count($data));
+    }
+
+    /**
+     * Parse datetime from Excel/CSV data with various formats
+     */
+    private function parseDateTime($dateValue, $timeValue = null)
+    {
+        try {
+            // If date is empty, use current datetime
+            if (empty($dateValue)) {
+                return \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+            }
+
+            // Handle Excel date number format
+            if (is_numeric($dateValue)) {
+                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateValue);
+                $dateString = $date->format('Y-m-d');
+            } else {
+                // Handle string date formats like "1/15/2024", "2024-01-15", etc.
+                $date = \DateTime::createFromFormat('m/d/Y', $dateValue);
+                if (!$date) {
+                    $date = \DateTime::createFromFormat('Y-m-d', $dateValue);
+                }
+                if (!$date) {
+                    $date = \DateTime::createFromFormat('d/m/Y', $dateValue);
+                }
+                if (!$date) {
+                    // Try generic date parsing
+                    $date = date_create($dateValue);
+                }
+                
+                if (!$date) {
+                    throw new \Exception("Could not parse date: {$dateValue}");
+                }
+                
+                $dateString = $date->format('Y-m-d');
+            }
+
+            // Handle time component
+            if (!empty($timeValue)) {
+                // Parse time value
+                if (is_numeric($timeValue)) {
+                    // Excel time format
+                    $timeObj = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($timeValue);
+                    $timeString = $timeObj->format('H:i:s');
+                } else {
+                    // String time format like "12:30:00" or "12:30"
+                    $timeObj = \DateTime::createFromFormat('H:i:s', $timeValue);
+                    if (!$timeObj) {
+                        $timeObj = \DateTime::createFromFormat('H:i', $timeValue);
+                    }
+                    if (!$timeObj) {
+                        // Default to current time if parsing fails
+                        $timeString = \Carbon\Carbon::now()->format('H:i:s');
+                    } else {
+                        $timeString = $timeObj->format('H:i:s');
+                    }
+                }
+                
+                return $dateString . ' ' . $timeString;
+            } else {
+                // No time component, use default time
+                return $dateString . ' 00:00:00';
+            }
+
+        } catch (\Exception $e) {
+            Log::warning("Date parsing failed for '{$dateValue}' '{$timeValue}': " . $e->getMessage());
+            return \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        }
     }
 
     /**

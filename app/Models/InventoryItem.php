@@ -11,22 +11,26 @@ class InventoryItem extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'sku',
         'name',
-        'category',
-        'unit',
+        'description',
+        'uom',
         'current_stock',
-        'minimum_stock',
+        'safety_stock',
+        'reorder_point',
         'unit_cost',
         'supplier',
-        'last_updated',
+        'lead_time_days',
+        'is_active',
         'dataset_id',
     ];
 
     protected $casts = [
-        'current_stock' => 'decimal:2',
-        'minimum_stock' => 'decimal:2',
+        'current_stock' => 'decimal:3',
+        'safety_stock' => 'decimal:3',
+        'reorder_point' => 'decimal:3',
         'unit_cost' => 'decimal:2',
-        'last_updated' => 'datetime',
+        'is_active' => 'boolean',
     ];
 
     public function restaurant()

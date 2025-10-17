@@ -169,9 +169,14 @@
                                         <i class="fas fa-eye me-1"></i>Detail
                                     </a>
                                 @elseif($dataset->status === 'failed')
-                                    <button class="btn btn-sm btn-outline-danger" onclick="showError({{ $dataset->id }}, '{{ addslashes($dataset->validation_errors) }}')">
-                                        <i class="fas fa-exclamation-circle me-1"></i>View Error
-                                    </button>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-warning process-btn" onclick="processDataset({{ $dataset->id }})" title="Reprocess Dataset">
+                                            <i class="fas fa-redo me-1"></i>Reprocess
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="showError({{ $dataset->id }}, '{{ addslashes($dataset->validation_errors) }}')" title="View Error Details">
+                                            <i class="fas fa-exclamation-circle me-1"></i>View Error
+                                        </button>
+                                    </div>
                                 @endif
                                 <button class="btn btn-sm btn-outline-danger" onclick="deleteDataset({{ $dataset->id }})">
                                     <i class="fas fa-trash"></i>
@@ -284,13 +289,19 @@ document.getElementById('submitImport').addEventListener('click', function() {
 });
 
 function processDataset(datasetId) {
-    if (!confirm('Are you sure you want to process this dataset? This will import the data into your restaurant database.')) {
+    const btn = event.target.closest('button');
+    const isReprocess = btn.innerHTML.includes('Reprocess');
+    const confirmMessage = isReprocess 
+        ? 'Are you sure you want to reprocess this dataset? This will retry the data import.'
+        : 'Are you sure you want to process this dataset? This will import the data into your restaurant database.';
+    
+    if (!confirm(confirmMessage)) {
         return;
     }
     
-    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Starting...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isReprocess ? 'Reprocessing...' : 'Starting...');
     
     fetch(`/datasets/${datasetId}/process`, {
         method: 'POST',
@@ -303,32 +314,35 @@ function processDataset(datasetId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Show success message
+            showSuccessToast(data.message);
+            
             // Update the row
             const row = document.querySelector(`tr[data-dataset-id="${datasetId}"]`);
             const statusCell = row.querySelector('.status-cell');
             const actionCell = row.querySelector('.action-cell');
             
             statusCell.innerHTML = '<span class="badge bg-warning">Processing...</span>';
-            actionCell.innerHTML = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-spinner fa-spin me-1"></i>Processing...</button>';
+            actionCell.innerHTML = '<button class="btn btn-sm btn-secondary" disabled><i class="fas fa-spinner fa-spin me-1"></i>Processing...</button><button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDataset(' + datasetId + ')"><i class="fas fa-trash"></i></button>';
             
             // Poll for status updates
             pollDatasetStatus(datasetId);
         } else {
-            alert('Failed to start processing: ' + data.error);
+            showErrorToast('Failed to start ' + (isReprocess ? 'reprocessing' : 'processing') + ': ' + (data.error || data.message));
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-play me-1"></i>Process';
+            btn.innerHTML = originalText;
         }
     })
     .catch(error => {
-        alert('Error: ' + error.message);
+        showErrorToast('Network error: ' + error.message);
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-play me-1"></i>Process';
+        btn.innerHTML = originalText;
     });
 }
 
 function pollDatasetStatus(datasetId) {
     const interval = setInterval(() => {
-        fetch(`/datasets/${datasetId}`, {
+        fetch(`/datasets/${datasetId}/status`, {
             headers: {
                 'Accept': 'application/json',
             }
@@ -337,19 +351,84 @@ function pollDatasetStatus(datasetId) {
         .then(data => {
             if (data.status !== 'processing') {
                 clearInterval(interval);
-                location.reload();
+                updateDatasetRow(datasetId, data);
             }
         })
         .catch(() => {
             clearInterval(interval);
         });
-    }, 3000); // Poll every 3 seconds
+    }, 2000); // Poll every 2 seconds
+}
+
+function updateDatasetRow(datasetId, data) {
+    const row = document.querySelector(`tr[data-dataset-id="${datasetId}"]`);
+    if (!row) return;
+
+    const statusCell = row.querySelector('.status-cell');
+    const actionCell = row.querySelector('.action-cell');
+    
+    // Update status badge
+    let statusBadge = '';
+    switch(data.status) {
+        case 'completed':
+            statusBadge = '<span class="badge bg-success">Completed</span>';
+            showSuccessToast('Dataset processed successfully!');
+            break;
+        case 'failed':
+            statusBadge = '<span class="badge bg-danger">Failed</span>';
+            showErrorToast('Dataset processing failed. Check error details and try reprocessing.');
+            break;
+        default:
+            statusBadge = `<span class="badge bg-info">${data.status}</span>`;
+    }
+    statusCell.innerHTML = statusBadge;
+
+    // Update action buttons
+    let actionButtons = '';
+    if (data.status === 'completed') {
+        actionButtons = `
+            <a href="/datasets/${datasetId}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye me-1"></i>Detail
+            </a>
+        `;
+    } else if (data.status === 'failed') {
+        actionButtons = `
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-warning process-btn" onclick="processDataset(${datasetId})" title="Reprocess Dataset">
+                    <i class="fas fa-redo me-1"></i>Reprocess
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="showError(${datasetId}, '${data.validation_errors ? data.validation_errors.replace(/'/g, "\\'") : 'Unknown error'}')" title="View Error Details">
+                    <i class="fas fa-exclamation-circle me-1"></i>View Error
+                </button>
+            </div>
+        `;
+    } else if (data.status === 'uploaded') {
+        actionButtons = `
+            <button class="btn btn-sm btn-primary process-btn" onclick="processDataset(${datasetId})">
+                <i class="fas fa-play me-1"></i>Process
+            </button>
+        `;
+    }
+    
+    actionButtons += `
+        <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteDataset(${datasetId})">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    actionCell.innerHTML = actionButtons;
 }
 
 function deleteDataset(datasetId) {
-    if (!confirm('Are you sure you want to delete this dataset? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this dataset? This will also delete all related data (orders, menu items, inventory items). This action cannot be undone.')) {
         return;
     }
+    
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
     
     fetch(`/datasets/${datasetId}`, {
         method: 'DELETE',
@@ -361,18 +440,97 @@ function deleteDataset(datasetId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            location.reload();
+            showSuccessToast(data.message);
+            
+            // Optional: Show deletion details if available
+            if (data.deleted_counts && Object.values(data.deleted_counts).some(count => count > 0)) {
+                console.log('Deletion details:', data.deleted_counts);
+            }
+            
+            // Reload after a short delay to show the toast
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         } else {
-            alert('Failed to delete dataset: ' + data.error);
+            showErrorToast('Failed to delete dataset: ' + (data.error || data.message));
+            button.innerHTML = originalContent;
+            button.disabled = false;
         }
     })
     .catch(error => {
-        alert('Error: ' + error.message);
+        showErrorToast('Error deleting dataset: ' + error.message);
+        button.innerHTML = originalContent;
+        button.disabled = false;
     });
 }
 
 function showError(datasetId, error) {
-    alert('Dataset processing failed:\n\n' + error);
+    // Create a modal to show detailed error
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Dataset Processing Error
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2"><strong>Error Details:</strong></p>
+                    <div class="alert alert-danger">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.9em;">${error}</pre>
+                    </div>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        You can try to reprocess this dataset by clicking the "Reprocess" button.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" onclick="processDataset(${datasetId}); bootstrap.Modal.getInstance(this.closest('.modal')).hide();">
+                        <i class="fas fa-redo me-1"></i>Reprocess Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    modal.addEventListener('hidden.bs.modal', () => modal.remove());
+}
+
+function showSuccessToast(message) {
+    const toast = createToast('success', message);
+    document.body.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+function showErrorToast(message) {
+    const toast = createToast('danger', message);
+    document.body.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+function createToast(type, message) {
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    return toast;
 }
 </script>
 @endsection

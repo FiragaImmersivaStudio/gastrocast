@@ -11,18 +11,14 @@ class Order extends Model
 
     protected $fillable = [
         'restaurant_id',
-        'order_number',
         'order_no',
         'order_dt',
-        'order_date',
-        'order_time',
         'channel',
         'status',
         'gross_amount',
         'net_amount',
         'tax_amount',
         'discount_amount',
-        'total_amount',
         'waiting_time_sec',
         'party_size',
         'customer_name',

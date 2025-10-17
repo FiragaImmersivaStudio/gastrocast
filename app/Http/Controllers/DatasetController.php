@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ProcessDataset;
 use App\Models\Dataset;
+use App\Models\Order;
+use App\Models\MenuItem;
+use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -108,7 +113,13 @@ class DatasetController extends Controller
             return response()->json([
                 'error' => 'Dataset cannot be processed',
                 'status' => $dataset->status,
+                'message' => "Dataset status '{$dataset->status}' does not allow processing. Only 'uploaded' and 'failed' datasets can be processed.",
             ], 400);
+        }
+
+        // If dataset failed before, reset it for reprocessing
+        if ($dataset->status === 'failed') {
+            $dataset->resetForReprocessing();
         }
 
         // Update status to processing
@@ -117,9 +128,44 @@ class DatasetController extends Controller
         // Dispatch job to queue
         ProcessDataset::dispatch($dataset);
 
+        $message = $dataset->wasChanged() && $dataset->getOriginal('status') === 'failed' 
+            ? 'Dataset reprocessing started'
+            : 'Dataset processing started';
+
         return response()->json([
             'success' => true,
-            'message' => 'Dataset processing started',
+            'message' => $message,
+            'dataset' => [
+                'id' => $dataset->id,
+                'status' => $dataset->status,
+                'can_reprocess' => $dataset->canBeProcessed(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get dataset status for polling
+     */
+    public function status($id)
+    {
+        $dataset = Dataset::findOrFail($id);
+
+        // Verify ownership
+        if ($dataset->restaurant_id != session('selected_restaurant_id')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'id' => $dataset->id,
+            'status' => $dataset->status,
+            'total_records' => $dataset->total_records,
+            'processed_at' => $dataset->processed_at,
+            'validation_errors' => $dataset->validation_errors,
+            'processing_notes' => $dataset->processing_notes,
+            'can_reprocess' => $dataset->canBeProcessed(),
+            'is_processing' => $dataset->isProcessing(),
+            'is_completed' => $dataset->isCompleted(),
+            'is_failed' => $dataset->isFailed(),
         ]);
     }
 
@@ -165,18 +211,101 @@ class DatasetController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Delete file
-        if (Storage::exists($dataset->file_path)) {
-            Storage::delete($dataset->file_path);
+        DB::beginTransaction();
+        
+        try {
+            // Count related data before deletion for reporting
+            $deletedCounts = $this->deleteRelatedData($dataset);
+
+            // Delete file
+            if (Storage::exists($dataset->file_path)) {
+                Storage::delete($dataset->file_path);
+            }
+
+            // Delete dataset record
+            $dataset->delete();
+
+            DB::commit();
+
+            // Prepare success message with deletion details
+            $message = 'Dataset deleted successfully';
+            if (array_sum($deletedCounts) > 0) {
+                $details = [];
+                if ($deletedCounts['orders'] > 0) {
+                    $details[] = "{$deletedCounts['orders']} orders";
+                }
+                if ($deletedCounts['menu_items'] > 0) {
+                    $details[] = "{$deletedCounts['menu_items']} menu items";
+                }
+                if ($deletedCounts['inventory_items'] > 0) {
+                    $details[] = "{$deletedCounts['inventory_items']} inventory items";
+                }
+                
+                if (!empty($details)) {
+                    $message .= '. Also deleted: ' . implode(', ', $details);
+                }
+            }
+
+            Log::info("Dataset {$dataset->id} deleted with related data", $deletedCounts);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'deleted_counts' => $deletedCounts,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error("Failed to delete dataset {$dataset->id}: " . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete dataset',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete related data from other tables
+     */
+    private function deleteRelatedData(Dataset $dataset)
+    {
+        $deletedCounts = [
+            'orders' => 0,
+            'menu_items' => 0,
+            'inventory_items' => 0,
+        ];
+
+        // Delete orders related to this dataset
+        $ordersQuery = Order::where('dataset_id', $dataset->id);
+        $deletedCounts['orders'] = $ordersQuery->count();
+        if ($deletedCounts['orders'] > 0) {
+            // Delete order items first (due to foreign key constraint)
+            DB::table('order_items')
+                ->whereIn('order_id', $ordersQuery->pluck('id'))
+                ->delete();
+            
+            // Then delete orders
+            $ordersQuery->delete();
         }
 
-        // Delete record
-        $dataset->delete();
+        // Delete menu items related to this dataset
+        $menuItemsQuery = MenuItem::where('dataset_id', $dataset->id);
+        $deletedCounts['menu_items'] = $menuItemsQuery->count();
+        if ($deletedCounts['menu_items'] > 0) {
+            $menuItemsQuery->delete();
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Dataset deleted successfully',
-        ]);
+        // Delete inventory items related to this dataset
+        $inventoryItemsQuery = InventoryItem::where('dataset_id', $dataset->id);
+        $deletedCounts['inventory_items'] = $inventoryItemsQuery->count();
+        if ($deletedCounts['inventory_items'] > 0) {
+            $inventoryItemsQuery->delete();
+        }
+
+        return $deletedCounts;
     }
 
     /**
