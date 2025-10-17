@@ -129,12 +129,19 @@ This document describes the implementation of the dataset management functionali
 composer install
 ```
 
-### 2. Run Migrations
+### 2. Configure PHP Settings (Optional)
+Ensure your `php.ini` has adequate file upload limits:
+```ini
+upload_max_filesize = 10M
+post_max_size = 10M
+```
+
+### 3. Run Migrations
 ```bash
 php artisan migrate
 ```
 
-### 3. Configure Queue Driver (Optional but Recommended)
+### 4. Configure Queue Driver (Optional but Recommended)
 Update `.env` file:
 ```
 QUEUE_CONNECTION=database
@@ -184,11 +191,12 @@ mkdir -p storage/app/datasets
 - File type validation (XLSX only)
 - Restaurant ownership verification
 - User authentication required
-- File size limit (10MB)
+- File size limit (10MB) - enforced in DatasetController upload validation
 - SQL injection protection via Eloquent ORM
 
 ## Dependencies Added
 
-- `phpoffice/phpspreadsheet` (^2.3.5): For reading and creating XLSX files
-  - Version chosen to avoid security vulnerabilities
+- `phpoffice/phpspreadsheet` (^2.3.5, installed 2.4.1): For reading and creating XLSX files
+  - Uses latest stable version which includes security patches
+  - Addresses multiple XXE and XSS vulnerabilities from older versions
   - Used for template generation and file validation
