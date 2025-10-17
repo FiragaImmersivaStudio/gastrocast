@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone',
         'timezone',
+        'default_restaurant_id',
         'notification_forecast_ready',
         'notification_system_updates',
         'notification_forecast_next_month',
@@ -102,5 +103,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * User's default restaurant
+     */
+    public function defaultRestaurant()
+    {
+        return $this->belongsTo(Restaurant::class, 'default_restaurant_id');
     }
 }

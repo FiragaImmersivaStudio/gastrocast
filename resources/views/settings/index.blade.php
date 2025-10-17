@@ -2,7 +2,7 @@
 
 @section('title', 'Settings')
 
-@section('content')
+@section('styles')
 <style>
 .qr-code-section {
     background: #f8f9fa;
@@ -40,6 +40,8 @@
     padding-left: 15px;
 }
 </style>
+@endsection
+@section('content')
 
 <div class="row mt-4">
     <div class="col-md-3">
@@ -81,37 +83,45 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="firstName" class="form-label">First Name</label>
+                                        <label for="firstName" class="form-label">First Name *</label>
                                         <input type="text" class="form-control" id="firstName" name="first_name" value="{{ $user->first_name ?? explode(' ', $user->name)[0] ?? '' }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="lastName" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" id="lastName" name="last_name" value="{{ $user->last_name ?? (count(explode(' ', $user->name)) > 1 ? explode(' ', $user->name)[1] : '') }}">
+                                        <label for="lastName" class="form-label">Last Name *</label>
+                                        <input type="text" class="form-control" id="lastName" name="last_name" value="{{ $user->last_name ?? (count(explode(' ', $user->name)) > 1 ? explode(' ', $user->name)[1] : '') }}" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
+                                <label for="email" class="form-label">Email Address *</label>
                                 <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ $user->phone }}">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ $user->phone }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="timezone" class="form-label">Timezone</label>
+                                <label for="timezone" class="form-label">Timezone *</label>
                                 <select class="form-select" id="timezone" name="timezone" required>
-                                    <option value="UTC" {{ ($user->timezone ?? 'UTC') == 'UTC' ? 'selected' : '' }}>UTC</option>
-                                    <option value="Asia/Jakarta" {{ ($user->timezone ?? 'UTC') == 'Asia/Jakarta' ? 'selected' : '' }}>Asia/Jakarta (WIB)</option>
-                                    <option value="Asia/Makassar" {{ ($user->timezone ?? 'UTC') == 'Asia/Makassar' ? 'selected' : '' }}>Asia/Makassar (WITA)</option>
-                                    <option value="Asia/Jayapura" {{ ($user->timezone ?? 'UTC') == 'Asia/Jayapura' ? 'selected' : '' }}>Asia/Jayapura (WIT)</option>
-                                    <option value="America/New_York" {{ ($user->timezone ?? 'UTC') == 'America/New_York' ? 'selected' : '' }}>Eastern Time (ET)</option>
-                                    <option value="America/Chicago" {{ ($user->timezone ?? 'UTC') == 'America/Chicago' ? 'selected' : '' }}>Central Time (CT)</option>
-                                    <option value="America/Denver" {{ ($user->timezone ?? 'UTC') == 'America/Denver' ? 'selected' : '' }}>Mountain Time (MT)</option>
-                                    <option value="America/Los_Angeles" {{ ($user->timezone ?? 'UTC') == 'America/Los_Angeles' ? 'selected' : '' }}>Pacific Time (PT)</option>
+                                    <option value="Asia/Jakarta" {{ ($user->timezone ?? 'Asia/Jakarta') == 'Asia/Jakarta' ? 'selected' : '' }}>WIB - Jakarta (UTC+7)</option>
+                                    <option value="Asia/Makassar" {{ ($user->timezone ?? 'Asia/Jakarta') == 'Asia/Makassar' ? 'selected' : '' }}>WITA - Makassar (UTC+8)</option>
+                                    <option value="Asia/Jayapura" {{ ($user->timezone ?? 'Asia/Jakarta') == 'Asia/Jayapura' ? 'selected' : '' }}>WIT - Jayapura (UTC+9)</option>
+                                    <option value="Asia/Pontianak" {{ ($user->timezone ?? 'Asia/Jakarta') == 'Asia/Pontianak' ? 'selected' : '' }}>WIB - Pontianak (UTC+7)</option>
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="defaultRestaurant" class="form-label">Default Restaurant</label>
+                                <select class="form-select" id="defaultRestaurant" name="default_restaurant_id">
+                                    <option value="">Select default restaurant</option>
+                                    @foreach($user->restaurants as $restaurant)
+                                        <option value="{{ $restaurant->id }}" {{ $user->default_restaurant_id == $restaurant->id ? 'selected' : '' }}>
+                                            {{ $restaurant->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">This restaurant will be automatically selected when you log in.</small>
                             </div>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </form>
@@ -664,153 +674,181 @@
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
+    console.log("Settings page scripts loaded");
+
     // CSRF token setup
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
     // Profile form submission
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
+    $('#profileForm').on('submit', function(e) {
         console.log("Submitting profile form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.profile.update") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.profile.update") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('danger', data.message || 'An error occurred while updating profile');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while updating profile. Please try again.');
+                // Allow form to submit normally as fallback
+                setTimeout(() => {
+                    $('#profileForm')[0].submit();
+                }, 2000);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-            } else {
-                showAlert('danger', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while updating profile');
         });
     });
 
     // Restaurant form submission
-    const restaurantForm = document.getElementById('restaurantForm');
-    if (restaurantForm) {
-        restaurantForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            fetch('{{ route("settings.restaurant.update") }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', data.message);
-                } else {
-                    showAlert('danger', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('danger', 'An error occurred while updating restaurant settings');
-            });
-        });
-    }
-
-    // Notifications form submission
-    document.getElementById('notificationsForm').addEventListener('submit', function(e) {
+    $('#restaurantForm').on('submit', function(e) {
+        console.log("Submitting restaurant form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.notifications.update") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.restaurant.update") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('danger', data.message || 'An error occurred while updating restaurant settings');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while updating restaurant settings. Please try again.');
+                // Allow form to submit normally as fallback
+                setTimeout(() => {
+                    $('#restaurantForm')[0].submit();
+                }, 2000);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-            } else {
-                showAlert('danger', data.message);
+        });
+    });
+
+    // Notifications form submission
+    $('#notificationsForm').on('submit', function(e) {
+        console.log("Submitting notifications form");
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: '{{ route("settings.notifications.update") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('danger', data.message || 'An error occurred while updating notification preferences');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while updating notification preferences. Please try again.');
+                // Allow form to submit normally as fallback
+                setTimeout(() => {
+                    $('#notificationsForm')[0].submit();
+                }, 2000);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while updating notification preferences');
         });
     });
 
     // Password form submission
-    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    $('#passwordForm').on('submit', function(e) {
+        console.log("Submitting password form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.password.change") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.password.change") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    $('#passwordForm')[0].reset();
+                } else {
+                    showAlert('danger', data.message || 'An error occurred while changing password');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while changing password. Please try again.');
+                // Allow form to submit normally as fallback
+                setTimeout(() => {
+                    $('#passwordForm')[0].submit();
+                }, 2000);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                this.reset();
-            } else {
-                showAlert('danger', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while changing password');
         });
     });
 
     // 2FA Enable
-    const enable2FABtn = document.getElementById('enable2FA');
-    if (enable2FABtn) {
-        enable2FABtn.addEventListener('click', function() {
-            fetch('{{ route("settings.2fa.enable") }}', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
+    $('#enable2FA').on('click', function() {
+        console.log("Enabling 2FA");
+        $.ajax({
+            url: '{{ route("settings.2fa.enable") }}',
+            type: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            success: function(data) {
                 if (data.success) {
                     // Set the secret key
-                    document.getElementById('secretKey').value = data.secret;
-                    
+                    $('#secretKey').val(data.secret);
+
                     // Set the manual setup URL
                     if (data.qr_code_url) {
-                        document.getElementById('manualSetupUrl').value = data.qr_code_url;
+                        $('#manualSetupUrl').val(data.qr_code_url);
                     }
-                    
+
                     // Display QR code using third-party API with fallbacks
-                    const qrContainer = document.getElementById('qrCodeContainer');
-                    
+                    const qrContainer = $('#qrCodeContainer');
+
                     if (data.qr_code_apis) {
                         // Try multiple APIs with fallback system
                         const apis = data.qr_code_apis;
@@ -847,17 +885,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.backupCodes = data.backup_codes;
                     
                     // Show the modal
-                    new bootstrap.Modal(document.getElementById('twoFAModal')).show();
+                    $('#twoFAModal').modal('show');
                 } else {
                     showAlert('danger', data.message);
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
                 showAlert('danger', 'An error occurred while enabling 2FA');
-            });
+            }
         });
-    }
+    });
 
     // QR Code fallback system
     window.handleQRError = function(img) {
@@ -921,7 +960,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.downloadBackupCodes = function() {
         if (!window.backupCodes) return;
         
-        const content = config('app.name', 'GastroCast') . ' Two-Factor Authentication Backup Codes\n' +
+        const content = '{{ config('app.name', 'GastroCast') }} Two-Factor Authentication Backup Codes\n' +
                        'Generated: ' + new Date().toLocaleString() + '\n\n' +
                        'Keep these codes safe. Each code can only be used once.\n\n' +
                        window.backupCodes.join('\n');
@@ -938,145 +977,148 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // 2FA Verification
-    document.getElementById('verify2FAForm').addEventListener('submit', function(e) {
+    $('#verify2FAForm').on('submit', function(e) {
+        console.log("Submitting 2FA verification form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.2fa.verify") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.2fa.verify") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show backup codes section
-                if (window.backupCodes) {
-                    const backupCodesDiv = document.getElementById('backupCodes');
-                    backupCodesDiv.innerHTML = window.backupCodes.map(code => 
-                        `<div class="badge bg-light text-dark me-2 mb-1">${code}</div>`
-                    ).join('');
-                    document.getElementById('backupCodesSection').style.display = 'block';
-                    
-                    // Hide the form and show success message
-                    document.getElementById('verify2FAForm').style.display = 'none';
-                    showAlert('success', data.message + ' Please save your backup codes above!');
-                    
-                    // Auto-close modal after codes are shown
-                    setTimeout(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('twoFAModal')).hide();
-                        location.reload();
-                    }, 10000);
+            },
+            success: function(data) {
+                if (data.success) {
+                    // Show backup codes section
+                    if (window.backupCodes) {
+                        const backupCodesDiv = $('#backupCodes');
+                        backupCodesDiv.html(window.backupCodes.map(code =>
+                            `<div class="badge bg-light text-dark me-2 mb-1">${code}</div>`
+                        ).join(''));
+                        $('#backupCodesSection').show();
+
+                        // Hide the form and show success message
+                        $('#verify2FAForm').hide();
+                        showAlert('success', data.message + ' Please save your backup codes above!');
+
+                        // Auto-close modal after codes are shown
+                        setTimeout(() => {
+                            $('#twoFAModal').modal('hide');
+                            location.reload();
+                        }, 10000);
+                    } else {
+                        showAlert('success', data.message);
+                        $('#twoFAModal').modal('hide');
+                        setTimeout(() => location.reload(), 1000);
+                    }
                 } else {
-                    showAlert('success', data.message);
-                    bootstrap.Modal.getInstance(document.getElementById('twoFAModal')).hide();
-                    setTimeout(() => location.reload(), 1000);
+                    showAlert('danger', data.message);
                 }
-            } else {
-                showAlert('danger', data.message);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while verifying 2FA');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while verifying 2FA');
         });
     });
 
     // 2FA Disable
-    const disable2FABtn = document.getElementById('disable2FA');
-    if (disable2FABtn) {
-        disable2FABtn.addEventListener('click', function() {
-            new bootstrap.Modal(document.getElementById('disable2FAModal')).show();
-        });
-    }
+    $('#disable2FA').on('click', function() {
+        $('#disable2FAModal').modal('show');
+    });
 
-    document.getElementById('disable2FAForm').addEventListener('submit', function(e) {
+    $('#disable2FAForm').on('submit', function(e) {
+        console.log("Submitting 2FA disable form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.2fa.disable") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.2fa.disable") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    $('#disable2FAModal').modal('hide');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert('danger', data.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while disabling 2FA');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                bootstrap.Modal.getInstance(document.getElementById('disable2FAModal')).hide();
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showAlert('danger', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while disabling 2FA');
         });
     });
 
     // Delete account form
-    document.getElementById('deleteAccountForm').addEventListener('submit', function(e) {
+    $('#deleteAccountForm').on('submit', function(e) {
+        console.log("Submitting delete account form");
         e.preventDefault();
-        
+
         const formData = new FormData(this);
-        
-        fetch('{{ route("settings.account.delete") }}', {
-            method: 'POST',
-            body: formData,
+
+        $.ajax({
+            url: '{{ route("settings.account.delete") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    setTimeout(() => {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        }
+                    }, 2000);
+                } else {
+                    showAlert('danger', data.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                showAlert('danger', 'An error occurred while deleting account');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('success', data.message);
-                setTimeout(() => {
-                    if (data.redirect) {
-                        window.location.href = data.redirect;
-                    }
-                }, 2000);
-            } else {
-                showAlert('danger', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while deleting account');
         });
     });
 
     function showAlert(type, message) {
         // Remove existing alerts
-        const existingAlerts = document.querySelectorAll('.alert');
-        existingAlerts.forEach(alert => alert.remove());
-        
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
+        $('.alert').remove();
+
+        const alertDiv = $(`<div class="alert alert-${type} alert-dismissible fade show">
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
+        </div>`);
+
         // Insert at the top of the content
-        const contentDiv = document.querySelector('.tab-content');
-        contentDiv.insertBefore(alertDiv, contentDiv.firstChild);
-        
+        $('.tab-content').prepend(alertDiv);
+
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
+            alertDiv.remove();
         }, 5000);
     }
 });

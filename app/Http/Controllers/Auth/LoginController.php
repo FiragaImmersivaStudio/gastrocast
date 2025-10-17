@@ -30,6 +30,30 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+
+            // Auto-select default restaurant if set
+            $user = Auth::user();
+            if ($user->default_restaurant_id) {
+                $defaultRestaurant = \App\Models\Restaurant::find($user->default_restaurant_id);
+                if ($defaultRestaurant && $defaultRestaurant->is_active) {
+                    // Check if user has access to this restaurant
+                    $hasAccess = \App\Models\Restaurant::where('id', $defaultRestaurant->id)
+                        ->where(function($query) use ($user) {
+                            $query->where('owner_user_id', $user->id)
+                                  ->orWhereHas('users', function($q) use ($user) {
+                                      $q->where('user_id', $user->id);
+                                  });
+                        })->exists();
+
+                    if ($hasAccess) {
+                        session([
+                            'selected_restaurant_id' => $defaultRestaurant->id,
+                            'active_restaurant_name' => $defaultRestaurant->name
+                        ]);
+                    }
+                }
+            }
+
             return redirect()->intended('/dashboard');
         }
 

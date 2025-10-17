@@ -38,13 +38,14 @@ class SettingsController extends Controller
             
             $request->validate([
                 'first_name' => 'required|string|max:255',
-                'last_name' => 'nullable|string|max:255',
+                'last_name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'phone' => 'nullable|string|max:20',
-                'timezone' => 'required|string',
+                'phone' => 'required|string|max:20',
+                'timezone' => 'required|string|max:50|in:' . implode(',', $this->getIndonesianTimezones()),
+                'default_restaurant_id' => 'nullable|exists:restaurants,id',
             ]);
             
-            $fullName = trim($request->first_name . ' ' . ($request->last_name ?? ''));
+            $fullName = trim($request->first_name . ' ' . $request->last_name);
             
             $user->update([
                 'first_name' => $request->first_name,
@@ -53,6 +54,7 @@ class SettingsController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'timezone' => $request->timezone,
+                'default_restaurant_id' => $request->default_restaurant_id,
             ]);
             
             Log::info('Profile updated for user: ' . $user->id);
@@ -389,5 +391,18 @@ class SettingsController extends Controller
                 'message' => 'An error occurred: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get Indonesian timezone options
+     */
+    private function getIndonesianTimezones()
+    {
+        return [
+            'Asia/Jakarta',
+            'Asia/Makassar',
+            'Asia/Jayapura',
+            'Asia/Pontianak',
+        ];
     }
 }
