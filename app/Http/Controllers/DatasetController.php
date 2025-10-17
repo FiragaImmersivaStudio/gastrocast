@@ -184,21 +184,37 @@ class DatasetController extends Controller
      */
     public function downloadTemplate($type)
     {
+        // if (! in_array($type, ['sales', 'customers', 'menu', 'inventory'])) {
+        //     abort(404);
+        // }
+
+        // $spreadsheet = $this->createTemplate($type);
+        // $filename = "template_{$type}.xlsx";
+
+        // // Create temp file
+        // $tempFile = tempnam(sys_get_temp_dir(), 'template_');
+        // $writer = new Xlsx($spreadsheet);
+        // $writer->save($tempFile);
+
+        // return response()->download($tempFile, $filename, [
+        //     'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        // ])->deleteFileAfterSend(true);
+
         if (! in_array($type, ['sales', 'customers', 'menu', 'inventory'])) {
             abort(404);
         }
 
-        $spreadsheet = $this->createTemplate($type);
+        // return pre-made templates from public/templates/template_{type}.xlsx
+        $filePath = public_path("templates/template_{$type}.xlsx");
+        if (! file_exists($filePath)) {
+            abort(404);
+        }
+
         $filename = "template_{$type}.xlsx";
 
-        // Create temp file
-        $tempFile = tempnam(sys_get_temp_dir(), 'template_');
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
-
-        return response()->download($tempFile, $filename, [
+        return response()->download($filePath, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ])->deleteFileAfterSend(true);
+        ]);
     }
 
     /**
