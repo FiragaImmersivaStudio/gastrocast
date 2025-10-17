@@ -36,4 +36,14 @@ return [
         'default_model' => env('GROQ_DEFAULT_MODEL', 'llama-3.1-70b-versatile'),
     ],
 
+    'weather' => [
+        'source' => env('WEATHER_SOURCE', 'weatherapi'), // 'weatherapi' or 'openweathermap'
+        'weatherapi' => [
+            'key' => env('WEATHERAPI_KEY'),
+        ],
+        'openweathermap' => [
+            'key' => env('OPENWEATHERMAP_KEY'),
+        ],
+    ],
+
 ];
