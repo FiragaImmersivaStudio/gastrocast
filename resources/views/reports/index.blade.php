@@ -340,8 +340,15 @@ function pauseSchedule(id) {
     alert(`Schedule ${id} paused`);
 }
 
-function deleteSchedule(id) {
-    if (confirm('Are you sure you want to delete this scheduled report?')) {
+async function deleteSchedule(id) {
+    const confirmed = await confirmAction(
+        'Apakah Anda yakin ingin menghapus laporan terjadwal ini?',
+        'Konfirmasi Hapus',
+        'Ya, Hapus',
+        'Batal'
+    );
+    
+    if (confirmed) {
         alert(`Schedule ${id} deleted`);
     }
 }

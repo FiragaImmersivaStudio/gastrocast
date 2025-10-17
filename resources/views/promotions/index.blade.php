@@ -437,8 +437,15 @@ function pausePromotion(id) {
     alert(`Promotion ${id} paused`);
 }
 
-function cancelPromotion(id) {
-    if (confirm('Are you sure you want to cancel this promotion?')) {
+async function cancelPromotion(id) {
+    const confirmed = await confirmAction(
+        'Apakah Anda yakin ingin membatalkan promosi ini?',
+        'Konfirmasi Batal Promosi',
+        'Ya, Batalkan',
+        'Batal'
+    );
+    
+    if (confirmed) {
         alert(`Promotion ${id} cancelled`);
     }
 }

@@ -757,6 +757,61 @@
         .btn-outline-secondary.active .fas {
             color: #212529 !important;
         }
+        
+        /* Custom SweetAlert2 Styles */
+        .swal2-popup {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+        }
+        
+        .swal2-title {
+            color: #7A001F !important;
+            font-weight: 600 !important;
+        }
+        
+        .swal2-confirm {
+            background: #7A001F !important;
+            border-color: #7A001F !important;
+            color: white !important;
+            font-weight: 500 !important;
+            border-radius: 8px !important;
+            padding: 0.5rem 1.5rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .swal2-confirm:hover {
+            background: #6B0018 !important;
+            border-color: #6B0018 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(122, 0, 31, 0.3) !important;
+        }
+        
+        .swal2-cancel {
+            background: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+            font-weight: 500 !important;
+            border-radius: 8px !important;
+            padding: 0.5rem 1.5rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .swal2-cancel:hover {
+            background: #5a6268 !important;
+            border-color: #5a6268 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3) !important;
+        }
+        
+        .swal2-icon.swal2-question {
+            color: #7A001F !important;
+            border-color: #7A001F !important;
+        }
+        
+        .swal2-actions {
+            gap: 0.5rem !important;
+        }
     </style>
 
     @yield('styles')
@@ -965,6 +1020,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- CSRF Token for AJAX -->
     <script>
@@ -973,6 +1030,40 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        
+        // Custom SweetAlert2 configuration
+        const SwalConfig = Swal.mixin({
+            customClass: {
+                confirmButton: 'btn btn-primary me-2',
+                cancelButton: 'btn btn-secondary',
+                popup: 'rounded-3',
+                title: 'text-dark',
+                htmlContainer: 'text-muted'
+            },
+            buttonsStyling: false,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            }
+        });
+        
+        // Global confirm function using SweetAlert2
+        window.confirmAction = function(message, title = 'Konfirmasi', confirmText = 'Ya', cancelText = 'Batal') {
+            return SwalConfig.fire({
+                title: title,
+                text: message,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText,
+                confirmButtonColor: '#7A001F',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                return result.isConfirmed;
+            });
+        };
         
         // Restaurant selector handling
         $(document).ready(function() {

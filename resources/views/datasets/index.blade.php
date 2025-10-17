@@ -288,20 +288,24 @@ document.getElementById('submitImport').addEventListener('click', function() {
     });
 });
 
-function processDataset(datasetId) {
+async function processDataset(datasetId) {
     const btn = event.target.closest('button');
     const isReprocess = btn.innerHTML.includes('Reprocess');
     const confirmMessage = isReprocess 
-        ? 'Are you sure you want to reprocess this dataset? This will retry the data import.'
-        : 'Are you sure you want to process this dataset? This will import the data into your restaurant database.';
+        ? 'Apakah Anda yakin ingin memproses ulang dataset ini? Ini akan mencoba kembali mengimpor data.'
+        : 'Apakah Anda yakin ingin memproses dataset ini? Ini akan mengimpor data ke database restoran Anda.';
+    const confirmTitle = isReprocess ? 'Konfirmasi Proses Ulang' : 'Konfirmasi Proses Dataset';
+    const confirmButtonText = isReprocess ? 'Ya, Proses Ulang' : 'Ya, Proses';
     
-    if (!confirm(confirmMessage)) {
+    const confirmed = await confirmAction(confirmMessage, confirmTitle, confirmButtonText, 'Batal');
+    
+    if (!confirmed) {
         return;
     }
     
     const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isReprocess ? 'Reprocessing...' : 'Starting...');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isReprocess ? 'Memproses ulang...' : 'Memulai...');
     
     fetch(`/datasets/${datasetId}/process`, {
         method: 'POST',
@@ -419,8 +423,15 @@ function updateDatasetRow(datasetId, data) {
     actionCell.innerHTML = actionButtons;
 }
 
-function deleteDataset(datasetId) {
-    if (!confirm('Are you sure you want to delete this dataset? This will also delete all related data (orders, menu items, inventory items). This action cannot be undone.')) {
+async function deleteDataset(datasetId) {
+    const confirmed = await confirmAction(
+        'Apakah Anda yakin ingin menghapus dataset ini? Ini juga akan menghapus semua data terkait (pesanan, item menu, item inventori). Tindakan ini tidak dapat dibatalkan.',
+        'Konfirmasi Hapus Dataset',
+        'Ya, Hapus',
+        'Batal'
+    );
+    
+    if (!confirmed) {
         return;
     }
     
