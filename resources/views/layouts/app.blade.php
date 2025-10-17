@@ -84,6 +84,83 @@
             border-color: #6B0018;
         }
         
+        .btn-secondary {
+            background: #FFC107;
+            border-color: #FFC107;
+            color: #212529;
+            font-weight: 500;
+        }
+        
+        .btn-secondary:hover {
+            background: #FFCA2C;
+            border-color: #FFCA2C;
+            color: #212529;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-secondary:focus {
+            background: #FFCA2C;
+            border-color: #FFCA2C;
+            color: #212529;
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
+        }
+        
+        .btn-secondary:active {
+            background: #E0A800;
+            border-color: #E0A800;
+            color: #212529;
+        }
+        
+        .btn-secondary:disabled {
+            background: #FFC107;
+            border-color: #FFC107;
+            color: #6c757d;
+            opacity: 0.65;
+        }
+        
+        .btn-outline-secondary {
+            color: #FFC107;
+            border-color: #FFC107;
+            background: transparent;
+            font-weight: 500;
+        }
+        
+        .btn-outline-secondary:hover {
+            color: #212529;
+            background: #FFC107;
+            border-color: #FFC107;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-outline-secondary:focus {
+            color: #212529;
+            background: #FFC107;
+            border-color: #FFC107;
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
+        }
+        
+        .btn-outline-secondary:active {
+            color: #212529;
+            background: #E0A800;
+            border-color: #E0A800;
+        }
+        
+        .btn-outline-secondary.active {
+            color: #212529;
+            background: #FFC107;
+            border-color: #FFC107;
+            font-weight: 600;
+        }
+        
+        .btn-outline-secondary:disabled {
+            color: #FFC107;
+            background: transparent;
+            border-color: #FFC107;
+            opacity: 0.65;
+        }
+        
         .btn-warning {
             background: var(--accent-color);
             border-color: var(--accent-color);
@@ -333,6 +410,42 @@
         /* Badge Primary */
         .badge.bg-primary {
             background-color: var(--primary-color) !important;
+        }
+        
+        /* Badge Secondary */
+        .badge.bg-secondary {
+            background-color: #FFC107 !important;
+            color: #212529 !important;
+            font-weight: 600;
+        }
+        
+        .badge.bg-secondary:hover {
+            background-color: #FFCA2C !important;
+        }
+        
+        /* Secondary Color Utilities */
+        .text-secondary {
+            color: #FFC107 !important;
+        }
+        
+        .bg-secondary {
+            background-color: #FFC107 !important;
+            color: #212529 !important;
+        }
+        
+        .border-secondary {
+            border-color: #FFC107 !important;
+        }
+        
+        /* Alert Secondary */
+        .alert-secondary {
+            color: #212529 !important;
+            background-color: rgba(255, 193, 7, 0.1) !important;
+            border-color: #FFC107 !important;
+        }
+        
+        .alert-secondary .alert-link {
+            color: #E0A800 !important;
         }
         
         /* Nav Pills */
@@ -628,6 +741,22 @@
         .card-header.bg-primary .fas {
             color: white !important;
         }
+        
+        /* Pastikan icons dan text kontras untuk secondary */
+        .bg-secondary .fas,
+        .btn-secondary .fas,
+        .badge.bg-secondary .fas,
+        .alert-secondary .fas,
+        .btn-outline-secondary .fas {
+            color: #212529 !important;
+        }
+        
+        .btn-outline-secondary:hover .fas,
+        .btn-outline-secondary:focus .fas,
+        .btn-outline-secondary:active .fas,
+        .btn-outline-secondary.active .fas {
+            color: #212529 !important;
+        }
     </style>
 
     @yield('styles')
@@ -695,7 +824,7 @@
                     
                     <!-- User Menu -->
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user me-1"></i>{{ Auth::user()->name }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
