@@ -3,6 +3,10 @@
 @section('title', $restaurant->name . '')
 
 @section('styles')
+@if($restaurant->latitude && $restaurant->longitude)
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endif
 <style>
 .is-valid {
     border-color: #198754 !important;
@@ -21,6 +25,10 @@
 }
 .toast-container {
     z-index: 1055;
+}
+#map {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 </style>
 @endsection
@@ -55,43 +63,90 @@
                         <dl class="row">
                             <dt class="col-sm-4">Name:</dt>
                             <dd class="col-sm-8">{{ $restaurant->name }}</dd>
-                            
+
                             <dt class="col-sm-4">Category:</dt>
                             <dd class="col-sm-8">{{ $restaurant->category ?: 'Not specified' }}</dd>
-                            
+
                             <dt class="col-sm-4">Phone:</dt>
                             <dd class="col-sm-8">{{ $restaurant->phone ?: 'Not provided' }}</dd>
-                            
+
                             <dt class="col-sm-4">Email:</dt>
                             <dd class="col-sm-8">{{ $restaurant->email ?: 'Not provided' }}</dd>
+
+                            <dt class="col-sm-4">Website:</dt>
+                            <dd class="col-sm-8">
+                                @if($restaurant->website)
+                                    <a href="{{ $restaurant->website }}" target="_blank" rel="noopener noreferrer">
+                                        {{ $restaurant->website }} <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                @else
+                                    Not provided
+                                @endif
+                            </dd>
+
+                            <dt class="col-sm-4">Timezone:</dt>
+                            <dd class="col-sm-8">{{ $restaurant->timezone }}</dd>
                         </dl>
                     </div>
                     <div class="col-md-6">
                         <dl class="row">
-                            <dt class="col-sm-4">Timezone:</dt>
-                            <dd class="col-sm-8">{{ $restaurant->timezone }}</dd>
-                            
                             <dt class="col-sm-4">Status:</dt>
                             <dd class="col-sm-8">
                                 <span class="badge {{ $restaurant->is_active ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $restaurant->is_active ? 'Active' : 'Inactive' }}
                                 </span>
                             </dd>
-                            
+
+                            <dt class="col-sm-4">Location:</dt>
+                            <dd class="col-sm-8">
+                                @if($restaurant->latitude && $restaurant->longitude)
+                                    {{ number_format($restaurant->latitude, 6) }}, {{ number_format($restaurant->longitude, 6) }}
+                                @else
+                                    Not specified
+                                @endif
+                            </dd>
+
+                            <dt class="col-sm-4">Mall:</dt>
+                            <dd class="col-sm-8">
+                                @if($restaurant->is_inside_mall)
+                                    {{ $restaurant->mall_name ?: 'Mall name not specified' }}
+                                @else
+                                    Not in a mall
+                                @endif
+                            </dd>
+
                             <dt class="col-sm-4">Created:</dt>
                             <dd class="col-sm-8">{{ $restaurant->created_at->format('M j, Y') }}</dd>
-                            
+
                             <dt class="col-sm-4">Updated:</dt>
                             <dd class="col-sm-8">{{ $restaurant->updated_at->format('M j, Y') }}</dd>
                         </dl>
                     </div>
                 </div>
-                
+
                 @if($restaurant->address)
                 <div class="row mt-3">
                     <div class="col-12">
                         <strong>Address:</strong>
                         <p class="mb-0">{{ $restaurant->address }}</p>
+                    </div>
+                </div>
+                @endif
+
+                @if($restaurant->description)
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Description:</strong>
+                        <p class="mb-0">{{ $restaurant->description }}</p>
+                    </div>
+                </div>
+                @endif
+
+                @if($restaurant->latitude && $restaurant->longitude)
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Location Map:</strong>
+                        <div id="map" style="height: 300px; width: 100%; border-radius: 8px; margin-top: 10px;"></div>
                     </div>
                 </div>
                 @endif
@@ -556,5 +611,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Initialize map if coordinates exist
+@if($restaurant->latitude && $restaurant->longitude)
+document.addEventListener('DOMContentLoaded', function() {
+    // Leaflet JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = function() {
+        const map = L.map('map').setView([{{ $restaurant->latitude }}, {{ $restaurant->longitude }}], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([{{ $restaurant->latitude }}, {{ $restaurant->longitude }}]).addTo(map)
+            .bindPopup('<strong>{{ addslashes($restaurant->name) }}</strong><br>{{ addslashes($restaurant->address ?? "No address provided") }}')
+            .openPopup();
+    };
+    document.head.appendChild(script);
+});
+@endif
 </script>
 @endsection

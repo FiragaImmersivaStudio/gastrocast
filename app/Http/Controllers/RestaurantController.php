@@ -44,9 +44,15 @@ class RestaurantController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'timezone' => 'required|string|max:50',
+            'website' => 'nullable|url|max:255',
+            'description' => 'nullable|string|max:1000',
+            'is_inside_mall' => 'boolean',
+            'mall_name' => 'nullable|string|max:255',
+            'timezone' => 'required|string|max:50|in:' . implode(',', $this->getIndonesianTimezones()),
         ]);
 
         $restaurant = Restaurant::create([
@@ -54,8 +60,14 @@ class RestaurantController extends Controller
             'name' => $request->name,
             'category' => $request->category,
             'address' => $request->address,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'phone' => $request->phone,
             'email' => $request->email,
+            'website' => $request->website,
+            'description' => $request->description,
+            'is_inside_mall' => $request->boolean('is_inside_mall'),
+            'mall_name' => $request->mall_name,
             'timezone' => $request->timezone,
             'is_active' => true,
         ]);
@@ -99,13 +111,19 @@ class RestaurantController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'timezone' => 'required|string|max:50',
+            'website' => 'nullable|url|max:255',
+            'description' => 'nullable|string|max:1000',
+            'is_inside_mall' => 'boolean',
+            'mall_name' => 'nullable|string|max:255',
+            'timezone' => 'required|string|max:50|in:' . implode(',', $this->getIndonesianTimezones()),
         ]);
 
         $restaurant->update($request->only([
-            'name', 'category', 'address', 'phone', 'email', 'timezone'
+            'name', 'category', 'address', 'latitude', 'longitude', 'phone', 'email', 'website', 'description', 'is_inside_mall', 'mall_name', 'timezone'
         ]));
 
         return redirect()->route('restaurants.index')
@@ -324,5 +342,18 @@ class RestaurantController extends Controller
                 'message' => 'An unexpected error occurred. Please try again.'
             ], 500);
         }
+    }
+
+    /**
+     * Get Indonesian timezone options
+     */
+    private function getIndonesianTimezones()
+    {
+        return [
+            'Asia/Jakarta',
+            'Asia/Makassar',
+            'Asia/Jayapura',
+            'Asia/Pontianak',
+        ];
     }
 }

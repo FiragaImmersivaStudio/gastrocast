@@ -14,8 +14,14 @@ class Restaurant extends Model
         'name',
         'category',
         'address',
+        'latitude',
+        'longitude',
         'phone',
         'email',
+        'website',
+        'description',
+        'is_inside_mall',
+        'mall_name',
         'timezone',
         'currency',
         'operating_hours',
@@ -25,6 +31,9 @@ class Restaurant extends Model
     protected $casts = [
         'operating_hours' => 'array',
         'is_active' => 'boolean',
+        'is_inside_mall' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     /**

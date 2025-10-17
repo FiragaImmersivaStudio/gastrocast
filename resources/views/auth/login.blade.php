@@ -37,7 +37,7 @@
 </head>
 <body class="d-flex align-items-center">
     <div class="container">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mt-4">
             <div class="col-md-6 col-lg-4">
                 <div class="card login-card">
                     <div class="card-body p-5">
