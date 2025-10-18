@@ -170,17 +170,30 @@ For each API call, the system logs:
 - **WeatherService request details**:
   ```
   WeatherService: Fetching historical weather data
-  [lat, lon, start, start_datetime, source]
+  Context: {
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "start": 1609459200,
+    "start_datetime": "2021-01-01 00:00:00",
+    "source": "openweathermap_history"
+  }
   ```
 - **Successful API response**:
   ```
   WeatherService: Successfully fetched historical weather data
-  [status_code, data_count]
+  Context: {
+    "status_code": 200,
+    "data_count": 150
+  }
   ```
 - **Failed API response**:
   ```
   WeatherService: Failed to fetch historical weather data
-  [status_code, response_body, error_message]
+  Context: {
+    "status_code": 401,
+    "response_body": "{\"cod\":401,\"message\":\"Invalid API key\"}",
+    "error_message": "Unable to fetch historical weather data from OpenWeatherMap"
+  }
   ```
 - **Number of weather records fetched**:
   ```
@@ -210,12 +223,29 @@ For each order being updated:
 - **Weather data validation**:
   ```
   Invalid weather data structure for order {id}
-  [weather_data]
+  Context: {
+    "weather_data": {
+      "dt": 1609459200,
+      "clouds": {"all": 90},
+      ... (missing required 'main' or 'weather' fields)
+    }
+  }
   ```
 - **Successful update preparation**:
   ```
-  Updating order {id} (order_no: {order_no}, order_dt: {datetime}) with weather data
-  [weather_data: {temp, condition, description, humidity, pressure, wind_speed, fetched_at}, time_diff_seconds]
+  Updating order 123 (order_no: ORD-001, order_dt: 2021-01-01 12:00:00) with weather data
+  Context: {
+    "weather_data": {
+      "weather_temp": 275.45,
+      "weather_condition": "Rain",
+      "weather_description": "moderate rain",
+      "weather_humidity": 74,
+      "weather_pressure": 1014,
+      "weather_wind_speed": 2.16,
+      "weather_fetched_at": "2024-10-18 16:00:00"
+    },
+    "time_diff_seconds": 3600
+  }
   ```
 - **Successful database update**:
   ```
@@ -228,7 +258,11 @@ For each order being updated:
 - **Exception during update**:
   ```
   Exception while updating order {id} with weather data: {error_message}
-  [exception, order_id, order_dt]
+  Context: {
+    "exception": Exception object,
+    "order_id": 123,
+    "order_dt": "2021-01-01 12:00:00"
+  }
   ```
 - **No matching weather data**:
   ```
