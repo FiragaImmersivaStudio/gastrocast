@@ -61,11 +61,13 @@ class ProcessDataset implements ShouldQueue
             // Process based on type
             switch ($this->dataset->type) {
                 case 'sales':
-                    Log::info("Processing sales data for dataset {$this->dataset->id}");
+                    Log::info("=== START: Processing sales data for dataset {$this->dataset->id} ===");
                     $this->processSalesData($data);
-                    Log::info('Finished processing sales data, now fetching weather data...');
-                    // Fetch weather data for sales orders
+                    Log::info("=== FINISHED: Processing sales data for dataset {$this->dataset->id} ===");
+                    
+                    Log::info("=== START: Fetching weather data for dataset {$this->dataset->id} ===");
                     $this->fetchWeatherDataForOrders();
+                    Log::info("=== FINISHED: Fetching weather data for dataset {$this->dataset->id} ===");
                     break;
                 case 'menu':
                     $this->processMenuData($data);
@@ -359,10 +361,20 @@ class ProcessDataset implements ShouldQueue
     private function fetchWeatherDataForOrders()
     {
         try {
-            Log::info("Starting weather data fetch for dataset {$this->dataset->id}");
+            Log::info("=== fetchWeatherDataForOrders() CALLED for dataset {$this->dataset->id} ===");
 
             // Get restaurant coordinates
             $restaurant = $this->dataset->restaurant;
+            
+            Log::info("Restaurant data check", [
+                'restaurant_exists' => !is_null($restaurant),
+                'restaurant_id' => $restaurant ? $restaurant->id : null,
+                'has_latitude' => $restaurant && !is_null($restaurant->latitude),
+                'has_longitude' => $restaurant && !is_null($restaurant->longitude),
+                'latitude' => $restaurant ? $restaurant->latitude : null,
+                'longitude' => $restaurant ? $restaurant->longitude : null,
+            ]);
+            
             if (! $restaurant || ! $restaurant->latitude || ! $restaurant->longitude) {
                 Log::warning("Restaurant coordinates not available for dataset {$this->dataset->id}. Skipping weather fetch.");
 
@@ -371,7 +383,7 @@ class ProcessDataset implements ShouldQueue
 
             $lat = $restaurant->latitude;
             $lon = $restaurant->longitude;
-            Log::info("Restaurant coordinates: lat={$lat}, lon={$lon}");
+            Log::info("Restaurant coordinates validated: lat={$lat}, lon={$lon}");
 
             // Get all orders from this dataset that don't have weather data yet
             $orders = Order::where('dataset_id', $this->dataset->id)
@@ -405,21 +417,32 @@ class ProcessDataset implements ShouldQueue
             // Fetch weather data in chunks of 150 hours
             while ($currentStart <= $endTime) {
                 $startDateTime = date('Y-m-d H:i:s', $currentStart);
-                Log::info("Fetching weather data starting from {$startDateTime}");
+                Log::info("API Call #{$fetchCount}: Fetching weather data starting from {$startDateTime}", [
+                    'unix_timestamp' => $currentStart,
+                    'lat' => $lat,
+                    'lon' => $lon,
+                ]);
 
                 // Fetch weather data for this time window
                 $response = $weatherService->getHistoricalWeatherFromOpenWeatherMapByCoords($lat, $lon, $currentStart);
+
+                Log::info("API Response received", [
+                    'has_error' => isset($response['error']),
+                    'has_list' => isset($response['list']),
+                    'list_count' => isset($response['list']) ? count($response['list']) : 0,
+                    'response_keys' => array_keys($response),
+                ]);
 
                 if (! isset($response['error']) && isset($response['list'])) {
                     // Store weather data indexed by timestamp
                     foreach ($response['list'] as $weather) {
                         $weatherData[$weather['dt']] = $weather;
                     }
-                    Log::info('Fetched '.count($response['list']).' weather records');
+                    Log::info("Successfully fetched ".count($response['list'])." weather records. Total weather data now: ".count($weatherData));
                 } else {
                     $error = $response['error'] ?? 'Unknown error';
-                    Log::warning("Failed to fetch weather data: {$error}");
-                    Log::debug('Weather API response: '.json_encode($response));
+                    Log::error("Failed to fetch weather data: {$error}");
+                    Log::error('Full Weather API response', ['response' => $response]);
                 }
 
                 $fetchCount++;
@@ -437,7 +460,13 @@ class ProcessDataset implements ShouldQueue
             Log::info("Completed weather data fetch. Made {$fetchCount} API calls. Retrieved ".count($weatherData).' weather records.');
 
             if (empty($weatherData)) {
-                Log::warning('No weather data was retrieved from the API. Cannot update orders.');
+                Log::error('No weather data was retrieved from the API. Cannot update orders.');
+                Log::error('This could mean:', [
+                    'issue_1' => 'API key is invalid or expired',
+                    'issue_2' => 'Historical weather API access is not enabled for your OpenWeatherMap subscription',
+                    'issue_3' => 'Network connectivity issue',
+                    'issue_4' => 'API endpoint returned errors for all requests',
+                ]);
 
                 return;
             }
@@ -448,9 +477,19 @@ class ProcessDataset implements ShouldQueue
             $notFoundCount = 0;
 
             Log::info("Starting to match weather data to {$orders->count()} orders...");
+            Log::info("Weather data timestamp range", [
+                'earliest' => date('Y-m-d H:i:s', min(array_keys($weatherData))),
+                'latest' => date('Y-m-d H:i:s', max(array_keys($weatherData))),
+            ]);
 
             foreach ($orders as $order) {
                 $orderTimestamp = strtotime($order->order_dt);
+
+                Log::debug("Processing order {$order->id}", [
+                    'order_no' => $order->order_no,
+                    'order_dt' => $order->order_dt,
+                    'order_timestamp' => $orderTimestamp,
+                ]);
 
                 // Find the closest weather data (within 1 hour)
                 $closestWeather = null;
@@ -497,22 +536,35 @@ class ProcessDataset implements ShouldQueue
 
                         if ($updateResult) {
                             $updatedCount++;
-                            Log::debug("Successfully updated order {$order->id} with weather data");
+                            Log::info("✓ Successfully updated order {$order->id} with weather data");
+                            
+                            // Verify the update
+                            $order->refresh();
+                            Log::debug("Verified order {$order->id} after update", [
+                                'weather_temp' => $order->weather_temp,
+                                'weather_condition' => $order->weather_condition,
+                                'weather_fetched_at' => $order->weather_fetched_at,
+                            ]);
                         } else {
                             $failedCount++;
-                            Log::error("Failed to update order {$order->id} with weather data - update() returned false");
+                            Log::error("✗ Failed to update order {$order->id} with weather data - update() returned false");
                         }
                     } catch (\Exception $e) {
                         $failedCount++;
-                        Log::error("Exception while updating order {$order->id} with weather data: ".$e->getMessage(), [
-                            'exception' => $e,
+                        Log::error("✗ Exception while updating order {$order->id} with weather data: ".$e->getMessage(), [
+                            'exception' => get_class($e),
+                            'message' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
                             'order_id' => $order->id,
                             'order_dt' => $order->order_dt,
                         ]);
                     }
                 } else {
                     $notFoundCount++;
-                    Log::warning("No weather data found for order {$order->id} (order_no: {$order->order_no}) at {$order->order_dt}");
+                    Log::warning("No weather data found for order {$order->id} (order_no: {$order->order_no}) at {$order->order_dt}", [
+                        'order_timestamp' => $orderTimestamp,
+                        'closest_weather_timestamp' => !empty($weatherData) ? min(array_keys($weatherData)) : 'N/A',
+                    ]);
                 }
             }
 

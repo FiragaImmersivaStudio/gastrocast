@@ -37,7 +37,7 @@ return [
     ],
 
     'weather' => [
-        'source' => env('WEATHER_SOURCE', 'weatherapi'), // 'weatherapi' or 'openweathermap'
+        'source' => env('WEATHER_SOURCE', 'openweathermap'), // 'weatherapi' or 'openweathermap'
         'weatherapi' => [
             'key' => env('WEATHERAPI_KEY'),
         ],

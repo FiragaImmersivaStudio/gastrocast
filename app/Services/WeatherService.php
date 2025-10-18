@@ -7,20 +7,21 @@ use Illuminate\Support\Facades\Log;
 
 class WeatherService
 {
-    protected $source;
-
     protected $apiKey;
 
     protected $baseUrls = [
-        'weatherapi' => 'http://api.weatherapi.com/v1/',
-        'openweathermap' => 'http://api.openweathermap.org/data/2.5/',
-        'openweathermap_history' => 'https://history.openweathermap.org/data/2.5/history/',
+        'current' => 'http://api.openweathermap.org/data/2.5/',
+        'history' => 'https://history.openweathermap.org/data/2.5/history/',
     ];
 
     public function __construct()
     {
-        $this->source = config('services.weather.source', 'weatherapi');
-        $this->apiKey = config('services.weather.'.$this->source.'.key');
+        $this->apiKey = config('services.weather.openweathermap.key');
+        
+        Log::info('WeatherService initialized', [
+            'api_key_configured' => !empty($this->apiKey),
+            'api_key_length' => $this->apiKey ? strlen($this->apiKey) : 0,
+        ]);
     }
 
     /**
@@ -31,13 +32,25 @@ class WeatherService
      */
     public function getCurrentWeather($location)
     {
-        if ($this->source === 'weatherapi') {
-            return $this->getCurrentWeatherFromWeatherApi($location);
-        } elseif ($this->source === 'openweathermap') {
-            return $this->getCurrentWeatherFromOpenWeatherMap($location);
+        Log::info('WeatherService: Getting current weather', ['location' => $location]);
+        
+        $response = Http::timeout(30)->get($this->baseUrls['current'].'weather', [
+            'q' => $location,
+            'appid' => $this->apiKey,
+            'units' => 'metric',
+        ]);
+
+        if ($response->successful()) {
+            Log::info('WeatherService: Current weather fetched successfully');
+            return $response->json();
         }
 
-        return ['error' => 'Invalid weather source'];
+        Log::error('WeatherService: Failed to fetch current weather', [
+            'status_code' => $response->status(),
+            'response_body' => $response->body(),
+        ]);
+
+        return ['error' => 'Unable to fetch current weather data from OpenWeatherMap'];
     }
 
     /**
@@ -49,31 +62,26 @@ class WeatherService
      */
     public function getForecast($location, $days = 7)
     {
-        if ($this->source === 'weatherapi') {
-            return $this->getForecastFromWeatherApi($location, $days);
-        } elseif ($this->source === 'openweathermap') {
-            return $this->getForecastFromOpenWeatherMap($location, $days);
+        Log::info('WeatherService: Getting forecast', ['location' => $location, 'days' => $days]);
+        
+        // OpenWeatherMap forecast is for 5 days, 3-hourly
+        $response = Http::timeout(30)->get($this->baseUrls['current'].'forecast', [
+            'q' => $location,
+            'appid' => $this->apiKey,
+            'units' => 'metric',
+        ]);
+
+        if ($response->successful()) {
+            Log::info('WeatherService: Forecast fetched successfully');
+            return $response->json();
         }
 
-        return ['error' => 'Invalid weather source'];
-    }
+        Log::error('WeatherService: Failed to fetch forecast', [
+            'status_code' => $response->status(),
+            'response_body' => $response->body(),
+        ]);
 
-    /**
-     * Get historical weather for a location on a specific date
-     *
-     * @param  string  $location
-     * @param  string  $date  YYYY-MM-DD format
-     * @return array
-     */
-    public function getHistoricalWeather($location, $date)
-    {
-        if ($this->source === 'weatherapi') {
-            return $this->getHistoricalWeatherFromWeatherApi($location, $date);
-        } elseif ($this->source === 'openweathermap') {
-            return ['error' => 'Historical weather is not supported for OpenWeatherMap in the free tier'];
-        }
-
-        return ['error' => 'Invalid weather source'];
+        return ['error' => 'Unable to fetch forecast data from OpenWeatherMap'];
     }
 
     /**
@@ -91,10 +99,10 @@ class WeatherService
             'lon' => $lon,
             'start' => $start,
             'start_datetime' => date('Y-m-d H:i:s', $start),
-            'source' => 'openweathermap_history',
+            'api_url' => $this->baseUrls['history'].'city',
         ]);
 
-        $response = Http::timeout(30)->get($this->baseUrls['openweathermap_history'].'city', [
+        $response = Http::timeout(30)->get($this->baseUrls['history'].'city', [
             'lat' => $lat,
             'lon' => $lon,
             'type' => 'hour',
@@ -117,85 +125,11 @@ class WeatherService
             'status_code' => $response->status(),
             'response_body' => $response->body(),
             'error_message' => 'Unable to fetch historical weather data from OpenWeatherMap',
+            'api_key_length' => strlen($this->apiKey),
         ];
 
         Log::error('WeatherService: Failed to fetch historical weather data', $errorData);
 
         return ['error' => 'Unable to fetch historical weather data from OpenWeatherMap'];
-    }
-
-    private function getCurrentWeatherFromWeatherApi($location)
-    {
-        $response = Http::get($this->baseUrls['weatherapi'].'current.json', [
-            'key' => $this->apiKey,
-            'q' => $location,
-        ]);
-
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Unable to fetch current weather data from WeatherAPI'];
-    }
-
-    private function getForecastFromWeatherApi($location, $days)
-    {
-        $response = Http::get($this->baseUrls['weatherapi'].'forecast.json', [
-            'key' => $this->apiKey,
-            'q' => $location,
-            'days' => $days,
-        ]);
-
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Unable to fetch forecast data from WeatherAPI'];
-    }
-
-    private function getCurrentWeatherFromOpenWeatherMap($location)
-    {
-        $response = Http::get($this->baseUrls['openweathermap'].'weather', [
-            'q' => $location,
-            'appid' => $this->apiKey,
-            'units' => 'metric',
-        ]);
-
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Unable to fetch current weather data from OpenWeatherMap'];
-    }
-
-    private function getForecastFromOpenWeatherMap($location, $days)
-    {
-        // OpenWeatherMap forecast is for 5 days, 3-hourly
-        $response = Http::get($this->baseUrls['openweathermap'].'forecast', [
-            'q' => $location,
-            'appid' => $this->apiKey,
-            'units' => 'metric',
-        ]);
-
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Unable to fetch forecast data from OpenWeatherMap'];
-    }
-
-    private function getHistoricalWeatherFromWeatherApi($location, $date)
-    {
-        $response = Http::get($this->baseUrls['weatherapi'].'history.json', [
-            'key' => $this->apiKey,
-            'q' => $location,
-            'dt' => $date,
-        ]);
-
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Unable to fetch historical weather data from WeatherAPI'];
     }
 }
