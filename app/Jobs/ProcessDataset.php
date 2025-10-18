@@ -100,60 +100,93 @@ class ProcessDataset implements ShouldQueue
     {
         DB::beginTransaction();
         try {
+            // Group data by order_no to handle multiple items per order
+            $groupedData = [];
             foreach ($data as $row) {
                 if (empty($row[0])) {
-                    continue;
-                } // Skip empty rows
+                    continue; // Skip empty rows
+                }
+                $orderNo = $row[0];
+                if (!isset($groupedData[$orderNo])) {
+                    $groupedData[$orderNo] = [];
+                }
+                $groupedData[$orderNo][] = $row;
+            }
 
+            foreach ($groupedData as $orderNo => $rows) {
                 // Check if order already exists
                 $existingOrder = Order::where('restaurant_id', $this->dataset->restaurant_id)
-                    ->where('order_no', $row[0])
+                    ->where('order_no', $orderNo)
                     ->first();
 
                 if ($existingOrder) {
-                    continue; // Skip duplicates
+                    // If order exists, check if it already has items from this dataset
+                    $existingItemCount = OrderItem::where('order_id', $existingOrder->id)
+                        ->whereHas('order', function($q) {
+                            $q->where('dataset_id', $this->dataset->id);
+                        })
+                        ->count();
+                    
+                    if ($existingItemCount > 0) {
+                        continue; // Skip if already processed
+                    }
+                }
+
+                // Calculate totals from all items in this order
+                $totalGross = 0;
+                $firstRow = $rows[0]; // Use first row for order-level data
+                
+                foreach ($rows as $row) {
+                    $totalGross += $row[7] ?? 0; // total_amount per item
                 }
 
                 // Parse and format datetime properly
-                $orderDateTime = $this->parseDateTime($row[1] ?? null, $row[2] ?? null);
+                $orderDateTime = $this->parseDateTime($firstRow[1] ?? null, $firstRow[2] ?? null);
 
-                // Create order
-                $order = Order::create([
-                    'restaurant_id' => $this->dataset->restaurant_id,
-                    'order_no' => $row[0],
-                    'customer_name' => $row[3] ?? 'Guest',
-                    'order_dt' => $orderDateTime,
-                    'gross_amount' => $row[7] ?? 0,
-                    'net_amount' => $row[7] ?? 0,
-                    'payment_method' => $row[8] ?? 'cash',
-                    'status' => $row[9] ?? 'completed',
-                    'dataset_id' => $this->dataset->id,
-                ]);
-
-                // Find or create menu item
-                $menuItem = MenuItem::firstOrCreate(
+                // Create or update order
+                $order = Order::updateOrCreate(
                     [
                         'restaurant_id' => $this->dataset->restaurant_id,
-                        'name' => $row[4],
+                        'order_no' => $orderNo,
                     ],
                     [
-                        'sku' => 'AUTO_' . strtoupper(str_replace(' ', '_', $row[4])),
-                        'category_id' => null,
-                        'price' => $row[6] ?? 0,
-                        'cogs' => 0,
-                        'is_active' => true,
+                        'customer_name' => $firstRow[3] ?? 'Guest',
+                        'order_dt' => $orderDateTime,
+                        'gross_amount' => $totalGross,
+                        'net_amount' => $totalGross, // Assuming no discounts for now
+                        'payment_method' => $firstRow[8] ?? 'cash',
+                        'status' => $firstRow[9] ?? 'completed',
                         'dataset_id' => $this->dataset->id,
                     ]
                 );
 
-                // Create order item
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_item_id' => $menuItem->id,
-                    'qty' => $row[5] ?? 1,
-                    'unit_price' => $row[6] ?? 0,
-                    'line_total' => $row[7] ?? 0,
-                ]);
+                // Create order items for each row
+                foreach ($rows as $row) {
+                    // Find or create menu item
+                    $menuItem = MenuItem::firstOrCreate(
+                        [
+                            'restaurant_id' => $this->dataset->restaurant_id,
+                            'name' => $row[4],
+                        ],
+                        [
+                            'sku' => 'AUTO_' . strtoupper(str_replace(' ', '_', $row[4])),
+                            'category_id' => null,
+                            'price' => $row[6] ?? 0,
+                            'cogs' => 0,
+                            'is_active' => true,
+                            'dataset_id' => $this->dataset->id,
+                        ]
+                    );
+
+                    // Create order item
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'menu_item_id' => $menuItem->id,
+                        'qty' => $row[5] ?? 1,
+                        'unit_price' => $row[6] ?? 0,
+                        'line_total' => $row[7] ?? 0,
+                    ]);
+                }
             }
             DB::commit();
         } catch (\Exception $e) {

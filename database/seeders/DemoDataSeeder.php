@@ -19,83 +19,105 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed options: set to true to seed the corresponding table, false to skip
+        $seedOptions = [
+            'system_parameters' => true,
+            'users' => true,
+            'restaurants' => true,
+            'menu_data' => false,
+            'orders' => false,
+        ];
+
         // Create system parameters
-        $this->createSystemParameters();
+        if ($seedOptions['system_parameters']) {
+            $this->createSystemParameters();
+        }
 
         // Create demo user
-        $user = User::create([
-            'name' => 'Demo Owner',
-            'email' => 'demo@custicast.com',
-            'password' => Hash::make('demo123'),
-            'email_verified_at' => now(),
-        ]);
+        $user = null;
+        if ($seedOptions['users']) {
+            $user = User::create([
+                'name' => 'Demo Owner',
+                'email' => 'demo@custicast.com',
+                'password' => Hash::make('demo123'),
+                'email_verified_at' => now(),
+            ]);
 
-        // demo2
-        $user2 = User::create([
-            'name' => 'Demo User 2',
-            'email' => 'demo2@custicast.com',
-            'password' => Hash::make('demo123'),
-            'email_verified_at' => now(),
-        ]);
+            // demo2
+            $user2 = User::create([
+                'name' => 'Demo User 2',
+                'email' => 'demo2@custicast.com',
+                'password' => Hash::make('demo123'),
+                'email_verified_at' => now(),
+            ]);
 
-        // demo3
-        $user3 = User::create([
-            'name' => 'Demo User 3',
-            'email' => 'demo3@custicast.com',
-            'password' => Hash::make('demo123'),
-            'email_verified_at' => now(),
-        ]);
+            // demo3
+            $user3 = User::create([
+                'name' => 'Demo User 3',
+                'email' => 'demo3@custicast.com',
+                'password' => Hash::make('demo123'),
+                'email_verified_at' => now(),
+            ]);
+        }
 
         // Create demo restaurants
-        $restaurant1 = Restaurant::create([
-            'owner_user_id' => $user->id,
-            'name' => 'The Gourmet Burger',
-            'category' => 'Fast Casual',
-            'address' => '123 Main Street, Downtown City',
-            'phone' => '+1-555-0123',
-            'email' => 'info@gourmetburger.com',
-            'timezone' => 'America/New_York',
-            'operating_hours' => [
-                'monday' => ['open' => '11:00', 'close' => '22:00'],
-                'tuesday' => ['open' => '11:00', 'close' => '22:00'],
-                'wednesday' => ['open' => '11:00', 'close' => '22:00'],
-                'thursday' => ['open' => '11:00', 'close' => '22:00'],
-                'friday' => ['open' => '11:00', 'close' => '23:00'],
-                'saturday' => ['open' => '10:00', 'close' => '23:00'],
-                'sunday' => ['open' => '10:00', 'close' => '21:00'],
-            ],
-        ]);
+        $restaurant1 = null;
+        $restaurant2 = null;
+        if ($seedOptions['restaurants'] && $user) {
+            $restaurant1 = Restaurant::create([
+                'owner_user_id' => $user->id,
+                'name' => 'The Gourmet Burger',
+                'category' => 'Fast Casual',
+                'address' => '123 Main Street, Downtown City',
+                'phone' => '+1-555-0123',
+                'email' => 'info@gourmetburger.com',
+                'timezone' => 'America/New_York',
+                'operating_hours' => [
+                    'monday' => ['open' => '11:00', 'close' => '22:00'],
+                    'tuesday' => ['open' => '11:00', 'close' => '22:00'],
+                    'wednesday' => ['open' => '11:00', 'close' => '22:00'],
+                    'thursday' => ['open' => '11:00', 'close' => '22:00'],
+                    'friday' => ['open' => '11:00', 'close' => '23:00'],
+                    'saturday' => ['open' => '10:00', 'close' => '23:00'],
+                    'sunday' => ['open' => '10:00', 'close' => '21:00'],
+                ],
+            ]);
 
-        $restaurant2 = Restaurant::create([
-            'owner_user_id' => $user->id,
-            'name' => 'Pasta Paradise',
-            'category' => 'Italian',
-            'address' => '456 Oak Avenue, Uptown City',
-            'phone' => '+1-555-0456',
-            'email' => 'hello@pastaparadise.com',
-            'timezone' => 'America/New_York',
-            'operating_hours' => [
-                'monday' => ['open' => '12:00', 'close' => '21:00'],
-                'tuesday' => ['open' => '12:00', 'close' => '21:00'],
-                'wednesday' => ['open' => '12:00', 'close' => '21:00'],
-                'thursday' => ['open' => '12:00', 'close' => '21:00'],
-                'friday' => ['open' => '12:00', 'close' => '22:00'],
-                'saturday' => ['open' => '11:00', 'close' => '22:00'],
-                'sunday' => ['open' => '11:00', 'close' => '20:00'],
-            ],
-        ]);
+            $restaurant2 = Restaurant::create([
+                'owner_user_id' => $user->id,
+                'name' => 'Pasta Paradise',
+                'category' => 'Italian',
+                'address' => '456 Oak Avenue, Uptown City',
+                'phone' => '+1-555-0456',
+                'email' => 'hello@pastaparadise.com',
+                'timezone' => 'America/New_York',
+                'operating_hours' => [
+                    'monday' => ['open' => '12:00', 'close' => '21:00'],
+                    'tuesday' => ['open' => '12:00', 'close' => '21:00'],
+                    'wednesday' => ['open' => '12:00', 'close' => '21:00'],
+                    'thursday' => ['open' => '12:00', 'close' => '21:00'],
+                    'friday' => ['open' => '12:00', 'close' => '22:00'],
+                    'saturday' => ['open' => '11:00', 'close' => '22:00'],
+                    'sunday' => ['open' => '11:00', 'close' => '20:00'],
+                ],
+            ]);
 
-        // Add user to restaurant pivot table
-        $restaurant1->users()->attach($user->id, ['role' => 'owner', 'joined_at' => now()]);
-        $restaurant2->users()->attach($user->id, ['role' => 'owner', 'joined_at' => now()]);
+            // Add user to restaurant pivot table
+            $restaurant1->users()->attach($user->id, ['role' => 'owner', 'joined_at' => now()]);
+            $restaurant2->users()->attach($user->id, ['role' => 'owner', 'joined_at' => now()]);
+        }
 
         // Create menu categories and items for restaurant 1
-        $this->createMenuData($restaurant1, 'burger');
-        $this->createMenuData($restaurant2, 'italian');
+        if ($seedOptions['menu_data'] && $restaurant1 && $restaurant2) {
+            $this->createMenuData($restaurant1, 'burger');
+            $this->createMenuData($restaurant2, 'italian');
+        }
 
         // Create sample orders
-        $this->createSampleOrders($restaurant1);
-        $this->createSampleOrders($restaurant2);
+        if ($seedOptions['orders'] && $restaurant1 && $restaurant2) {
+            $this->createSampleOrders($restaurant1);
+            $this->createSampleOrders($restaurant2);
+        }
 
         $this->command->info('Demo data seeded successfully!');
         $this->command->info('Login credentials:');
