@@ -131,13 +131,209 @@ Sample response from OpenWeatherMap API:
 
 ## Logging
 
-The system logs:
-- Start/end of weather fetch process
-- Number of API calls made
-- Number of weather records retrieved
-- Number of orders updated
-- Any errors or warnings
-- Orders without matching weather data
+The system provides comprehensive logging to help diagnose issues with weather data fetching and storage:
+
+### Dataset Processing Logs
+
+- **Start of sales data processing**: 
+  ```
+  Processing sales data for dataset {id}
+  ```
+- **End of sales data processing**:
+  ```
+  Finished processing sales data, now fetching weather data...
+  ```
+
+### Weather Fetch Initialization Logs
+
+- **Start of weather fetch process**:
+  ```
+  Starting weather data fetch for dataset {id}
+  ```
+- **Restaurant coordinates**:
+  ```
+  Restaurant coordinates: lat={latitude}, lon={longitude}
+  ```
+- **Orders found**:
+  ```
+  Found {count} orders without weather data for dataset {id}
+  ```
+- **Order date range**:
+  ```
+  Order date range: {earliest_date} to {latest_date}
+  ```
+
+### API Request Logs
+
+For each API call, the system logs:
+
+- **WeatherService request details**:
+  ```
+  WeatherService: Fetching historical weather data
+  Context: {
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "start": 1609459200,
+    "start_datetime": "2021-01-01 00:00:00",
+    "source": "openweathermap_history"
+  }
+  ```
+- **Successful API response**:
+  ```
+  WeatherService: Successfully fetched historical weather data
+  Context: {
+    "status_code": 200,
+    "data_count": 150
+  }
+  ```
+- **Failed API response**:
+  ```
+  WeatherService: Failed to fetch historical weather data
+  Context: {
+    "status_code": 401,
+    "response_body": "{\"cod\":401,\"message\":\"Invalid API key\"}",
+    "error_message": "Unable to fetch historical weather data from OpenWeatherMap"
+  }
+  ```
+- **Number of weather records fetched**:
+  ```
+  Fetched {count} weather records
+  ```
+- **API errors with response data**:
+  ```
+  Failed to fetch weather data: {error}
+  Weather API response: {json_encoded_response}
+  ```
+
+### Weather Data Matching Logs
+
+- **Start of matching process**:
+  ```
+  Starting to match weather data to {count} orders...
+  ```
+- **Empty weather data warning**:
+  ```
+  No weather data was retrieved from the API. Cannot update orders.
+  ```
+
+### Individual Order Update Logs
+
+For each order being updated:
+
+- **Weather data validation**:
+  ```
+  Invalid weather data structure for order {id}
+  Context: {
+    "weather_data": {
+      "dt": 1609459200,
+      "clouds": {"all": 90},
+      ... (missing required 'main' or 'weather' fields)
+    }
+  }
+  ```
+- **Successful update preparation**:
+  ```
+  Updating order 123 (order_no: ORD-001, order_dt: 2021-01-01 12:00:00) with weather data
+  Context: {
+    "weather_data": {
+      "weather_temp": 275.45,
+      "weather_condition": "Rain",
+      "weather_description": "moderate rain",
+      "weather_humidity": 74,
+      "weather_pressure": 1014,
+      "weather_wind_speed": 2.16,
+      "weather_fetched_at": "2024-10-18 16:00:00"
+    },
+    "time_diff_seconds": 3600
+  }
+  ```
+- **Successful database update**:
+  ```
+  Successfully updated order {id} with weather data
+  ```
+- **Failed database update**:
+  ```
+  Failed to update order {id} with weather data - update() returned false
+  ```
+- **Exception during update**:
+  ```
+  Exception while updating order {id} with weather data: {error_message}
+  Context: {
+    "exception": Exception object,
+    "order_id": 123,
+    "order_dt": "2021-01-01 12:00:00"
+  }
+  ```
+- **No matching weather data**:
+  ```
+  No weather data found for order {id} (order_no: {order_no}) at {datetime}
+  ```
+
+### Summary Logs
+
+- **Final update summary**:
+  ```
+  Weather data update summary for dataset {id}: Updated={count}, Failed={count}, NotFound={count}, Total={count}
+  ```
+- **Overall completion**:
+  ```
+  Completed weather data fetch. Made {count} API calls. Retrieved {count} weather records.
+  ```
+
+### Error Logs
+
+- **Top-level error**:
+  ```
+  Failed to fetch weather data for dataset {id}: {error_message}
+  ```
+
+### Log Levels
+
+The logging uses different levels for different severity:
+
+- **Info**: Normal operation and progress updates
+- **Debug**: Detailed successful operations (order updates)
+- **Warning**: Non-critical issues (missing weather data, empty API responses)
+- **Error**: Critical failures (invalid data structure, update exceptions)
+
+### Viewing Logs
+
+To view logs in Laravel:
+
+```bash
+# View latest log file
+tail -f storage/logs/laravel.log
+
+# Search for weather-related logs
+grep -i "weather" storage/logs/laravel.log
+
+# Search for a specific dataset
+grep "dataset 123" storage/logs/laravel.log
+
+# View only errors
+grep -i "error.*weather" storage/logs/laravel.log
+```
+
+### Troubleshooting with Logs
+
+1. **Weather data not being saved**:
+   - Check for "No weather data was retrieved from the API" warning
+   - Look for API response errors with status codes
+   - Check for "Failed to update order" messages
+
+2. **API issues**:
+   - Look for "WeatherService: Failed to fetch" errors
+   - Check the response_body in error logs for API error details
+   - Verify coordinates and timestamps in request logs
+
+3. **Database update issues**:
+   - Check for "update() returned false" messages
+   - Look for exception messages with stack traces
+   - Verify order IDs and timestamps in error logs
+
+4. **Data validation issues**:
+   - Look for "Invalid weather data structure" errors
+   - Check the weather_data field in error logs to see what structure was received
 
 ## Usage in Analysis
 
