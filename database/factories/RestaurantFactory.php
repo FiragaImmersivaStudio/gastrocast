@@ -21,7 +21,7 @@ class RestaurantFactory extends Factory
             'category' => fake()->randomElement(['Fast Food', 'Fine Dining', 'Casual Dining', 'Cafe']),
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
-            'email' => fake()->companyEmail(),
+            'email' => fake()->unique()->safeEmail(),
             'timezone' => 'Asia/Jakarta',
             'currency' => 'IDR',
             'is_active' => true,
