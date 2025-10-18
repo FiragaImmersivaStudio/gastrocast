@@ -11,6 +11,7 @@ class WeatherService
     protected $baseUrls = [
         'weatherapi' => 'http://api.weatherapi.com/v1/',
         'openweathermap' => 'http://api.openweathermap.org/data/2.5/',
+        'openweathermap_history' => 'https://history.openweathermap.org/data/2.5/history/',
     ];
 
     public function __construct()
@@ -70,6 +71,32 @@ class WeatherService
         }
 
         return ['error' => 'Invalid weather source'];
+    }
+
+    /**
+     * Get historical weather from OpenWeatherMap for specific coordinates and time
+     * 
+     * @param float $lat Latitude
+     * @param float $lon Longitude
+     * @param int $start Unix timestamp for start time
+     * @return array
+     */
+    public function getHistoricalWeatherFromOpenWeatherMapByCoords($lat, $lon, $start)
+    {
+        $response = Http::timeout(30)->get($this->baseUrls['openweathermap_history'] . 'city', [
+            'lat' => $lat,
+            'lon' => $lon,
+            'type' => 'hour',
+            'start' => $start,
+            'cnt' => 150,
+            'appid' => $this->apiKey,
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        return ['error' => 'Unable to fetch historical weather data from OpenWeatherMap'];
     }
 
     private function getCurrentWeatherFromWeatherApi($location)

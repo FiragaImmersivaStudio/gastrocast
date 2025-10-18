@@ -7,6 +7,7 @@ use App\Models\InventoryItem;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\WeatherService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,8 +25,9 @@ class ProcessDataset implements ShouldQueue
 
     /**
      * The number of seconds the job can run before timing out.
+     * Increased to accommodate weather data fetching with delays.
      */
-    public $timeout = 300;
+    public $timeout = 600;
 
     /**
      * Create a new job instance.
@@ -60,6 +62,8 @@ class ProcessDataset implements ShouldQueue
             switch ($this->dataset->type) {
                 case 'sales':
                     $this->processSalesData($data);
+                    // Fetch weather data for sales orders
+                    $this->fetchWeatherDataForOrders();
                     break;
                 case 'menu':
                     $this->processMenuData($data);
@@ -343,6 +347,122 @@ class ProcessDataset implements ShouldQueue
         } catch (\Exception $e) {
             Log::warning("Date parsing failed for '{$dateValue}' '{$timeValue}': " . $e->getMessage());
             return \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        }
+    }
+
+    /**
+     * Fetch weather data for all orders from this dataset
+     */
+    private function fetchWeatherDataForOrders()
+    {
+        try {
+            Log::info("Starting weather data fetch for dataset {$this->dataset->id}");
+
+            // Get restaurant coordinates
+            $restaurant = $this->dataset->restaurant;
+            if (!$restaurant || !$restaurant->latitude || !$restaurant->longitude) {
+                Log::warning("Restaurant coordinates not available for dataset {$this->dataset->id}. Skipping weather fetch.");
+                return;
+            }
+
+            $lat = $restaurant->latitude;
+            $lon = $restaurant->longitude;
+
+            // Get all orders from this dataset that don't have weather data yet
+            $orders = Order::where('dataset_id', $this->dataset->id)
+                ->whereNull('weather_fetched_at')
+                ->orderBy('order_dt')
+                ->get();
+
+            if ($orders->isEmpty()) {
+                Log::info("No orders need weather data for dataset {$this->dataset->id}");
+                return;
+            }
+
+            $weatherService = new WeatherService();
+            
+            // Group orders by time windows (150 hours = 6.25 days)
+            // We'll fetch weather in batches starting from the earliest order time
+            $earliestOrder = $orders->first();
+            $latestOrder = $orders->last();
+            
+            $currentStart = strtotime($earliestOrder->order_dt);
+            $endTime = strtotime($latestOrder->order_dt);
+            
+            $weatherData = [];
+            $fetchCount = 0;
+            
+            // Fetch weather data in chunks of 150 hours
+            while ($currentStart <= $endTime) {
+                Log::info("Fetching weather data starting from " . date('Y-m-d H:i:s', $currentStart));
+                
+                // Fetch weather data for this time window
+                $response = $weatherService->getHistoricalWeatherFromOpenWeatherMapByCoords($lat, $lon, $currentStart);
+                
+                if (!isset($response['error']) && isset($response['list'])) {
+                    // Store weather data indexed by timestamp
+                    foreach ($response['list'] as $weather) {
+                        $weatherData[$weather['dt']] = $weather;
+                    }
+                    Log::info("Fetched " . count($response['list']) . " weather records");
+                } else {
+                    $error = $response['error'] ?? 'Unknown error';
+                    Log::warning("Failed to fetch weather data: {$error}");
+                }
+                
+                $fetchCount++;
+                
+                // Move to next time window (150 hours ahead)
+                $currentStart += (150 * 3600);
+                
+                // Add 5 second delay between API calls to prevent spam detection
+                if ($currentStart <= $endTime) {
+                    Log::info("Waiting 5 seconds before next API call...");
+                    sleep(5);
+                }
+            }
+            
+            Log::info("Completed weather data fetch. Made {$fetchCount} API calls. Retrieved " . count($weatherData) . " weather records.");
+            
+            // Now match weather data to orders
+            $updatedCount = 0;
+            foreach ($orders as $order) {
+                $orderTimestamp = strtotime($order->order_dt);
+                
+                // Find the closest weather data (within 1 hour)
+                $closestWeather = null;
+                $minDiff = PHP_INT_MAX;
+                
+                foreach ($weatherData as $timestamp => $weather) {
+                    $diff = abs($timestamp - $orderTimestamp);
+                    if ($diff < $minDiff && $diff <= 3600) { // Within 1 hour
+                        $minDiff = $diff;
+                        $closestWeather = $weather;
+                    }
+                }
+                
+                if ($closestWeather) {
+                    // Update order with weather data
+                    $order->update([
+                        'weather_temp' => $closestWeather['main']['temp'] ?? null,
+                        'weather_condition' => $closestWeather['weather'][0]['main'] ?? null,
+                        'weather_description' => $closestWeather['weather'][0]['description'] ?? null,
+                        'weather_humidity' => $closestWeather['main']['humidity'] ?? null,
+                        'weather_pressure' => $closestWeather['main']['pressure'] ?? null,
+                        'weather_wind_speed' => $closestWeather['wind']['speed'] ?? null,
+                        'weather_fetched_at' => now(),
+                    ]);
+                    $updatedCount++;
+                } else {
+                    Log::warning("No weather data found for order {$order->id} at " . $order->order_dt);
+                }
+            }
+            
+            Log::info("Updated {$updatedCount} orders with weather data for dataset {$this->dataset->id}");
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to fetch weather data for dataset {$this->dataset->id}: " . $e->getMessage());
+            // Don't throw exception - weather data is supplementary, not critical
         }
     }
 
