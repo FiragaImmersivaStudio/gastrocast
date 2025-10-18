@@ -3,52 +3,100 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Forecast;
+use App\Services\ForecastService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ForecastApiController extends Controller
 {
+    protected $forecastService;
+
+    public function __construct(ForecastService $forecastService)
+    {
+        $this->forecastService = $forecastService;
+    }
+
     /**
      * Run a forecast analysis
      */
     public function run(Request $request)
     {
         $request->validate([
-            'restaurant_id' => 'required|exists:restaurants,id',
-            'start_date' => 'required|date',
+            'restaurant_id' => 'nullable|exists:restaurants,id',
+            'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
             'metrics' => 'array',
-            'metrics.*' => 'string|in:sales,customer_count,avg_order_value,peak_hours'
+            'metrics.*' => 'string|in:sales,profit,customer_count,peak_hours'
         ]);
 
-        // Simulate forecast processing
-        $forecastData = [
-            'forecast_id' => uniqid('forecast_'),
-            'restaurant_id' => $request->restaurant_id,
-            'period' => [
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date
-            ],
-            'predictions' => [
-                'daily_sales' => [
-                    ['date' => '2024-01-01', 'predicted_sales' => 2500, 'confidence' => 0.85],
-                    ['date' => '2024-01-02', 'predicted_sales' => 2800, 'confidence' => 0.82],
-                    ['date' => '2024-01-03', 'predicted_sales' => 3200, 'confidence' => 0.88]
-                ],
-                'peak_hours' => [
-                    ['hour' => 12, 'expected_customers' => 45],
-                    ['hour' => 13, 'expected_customers' => 52],
-                    ['hour' => 19, 'expected_customers' => 48],
-                    ['hour' => 20, 'expected_customers' => 41]
-                ]
-            ],
-            'status' => 'completed',
-            'created_at' => now()
-        ];
+        // Get restaurant ID from request or session
+        $restaurantId = $request->restaurant_id ?: session('selected_restaurant_id');
+        
+        if (!$restaurantId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No restaurant selected'
+            ], 400);
+        }
 
-        return response()->json([
-            'data' => $forecastData,
-            'message' => 'Forecast analysis completed successfully'
-        ]);
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        // Validate date range (max 90 days)
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $daysDiff = $start->diffInDays($end);
+
+        if ($daysDiff > 90) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Periode forecast tidak boleh lebih dari 90 hari'
+            ], 400);
+        }
+
+        // Validate start date is not in the past
+        $now = Carbon::now();
+        if ($start->lessThan($now->startOfDay())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tanggal mulai harus di masa depan'
+            ], 400);
+        }
+
+        try {
+            // Generate forecast
+            $result = $this->forecastService->generateForecast(
+                $restaurantId,
+                $startDate,
+                $endDate,
+                $request->metrics ?? []
+            );
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['error']
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $result['data'],
+                'message' => 'Forecast berhasil dibuat'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Forecast generation failed', [
+                'error' => $e->getMessage(),
+                'restaurant_id' => $restaurantId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat forecast: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -56,25 +104,42 @@ class ForecastApiController extends Controller
      */
     public function summary(Request $request)
     {
-        $restaurantId = $request->query('restaurant_id');
+        $restaurantId = $request->query('restaurant_id') ?: session('selected_restaurant_id');
         
+        if (!$restaurantId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No restaurant selected'
+            ], 400);
+        }
+
+        $totalForecasts = Forecast::where('restaurant_id', $restaurantId)->count();
+        $latestForecast = Forecast::where('restaurant_id', $restaurantId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $avgAccuracy = Forecast::where('restaurant_id', $restaurantId)
+            ->whereNotNull('mape')
+            ->avg('mape');
+        
+        $accuracyRate = $avgAccuracy ? max(50, min(99, 100 - $avgAccuracy)) : 85.0;
+
         $summary = [
-            'total_forecasts' => 12,
-            'active_forecasts' => 3,
-            'accuracy_rate' => 87.5,
-            'last_forecast' => [
-                'id' => 'forecast_123',
-                'created_at' => now()->subHours(2),
-                'accuracy' => 89.2
-            ],
-            'trending_metrics' => [
-                'sales_trend' => 'increasing',
-                'customer_trend' => 'stable',
-                'avg_order_value_trend' => 'increasing'
-            ]
+            'total_forecasts' => $totalForecasts,
+            'accuracy_rate' => round($accuracyRate, 1),
+            'last_forecast' => $latestForecast ? [
+                'id' => $latestForecast->id,
+                'created_at' => $latestForecast->created_at,
+                'period' => [
+                    'start' => $latestForecast->start_date?->format('Y-m-d'),
+                    'end' => $latestForecast->end_date?->format('Y-m-d')
+                ],
+                'summary' => $latestForecast->summary_text
+            ] : null
         ];
 
         return response()->json([
+            'success' => true,
             'data' => $summary,
             'message' => 'Forecast summary retrieved successfully'
         ]);
@@ -85,30 +150,73 @@ class ForecastApiController extends Controller
      */
     public function show($forecastId)
     {
-        // Simulate fetching a specific forecast
-        $forecast = [
-            'id' => $forecastId,
-            'restaurant_id' => 1,
-            'status' => 'completed',
-            'created_at' => now()->subHours(1),
-            'updated_at' => now()->subMinutes(30),
-            'predictions' => [
-                'weekly_sales' => 18500,
-                'weekly_customers' => 450,
-                'avg_order_value' => 41.11,
-                'busiest_day' => 'Saturday',
-                'slowest_day' => 'Tuesday'
-            ],
-            'confidence_metrics' => [
-                'overall_confidence' => 86.5,
-                'sales_confidence' => 88.2,
-                'customer_confidence' => 84.8
-            ]
-        ];
+        $forecast = Forecast::with('restaurant')->find($forecastId);
+
+        if (!$forecast) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forecast not found'
+            ], 404);
+        }
 
         return response()->json([
-            'data' => $forecast,
+            'success' => true,
+            'data' => [
+                'id' => $forecast->id,
+                'restaurant_id' => $forecast->restaurant_id,
+                'restaurant_name' => $forecast->restaurant->name ?? 'N/A',
+                'period' => [
+                    'start_date' => $forecast->start_date?->format('Y-m-d'),
+                    'end_date' => $forecast->end_date?->format('Y-m-d'),
+                    'days' => $forecast->horizon_days
+                ],
+                'predictions' => $forecast->result_json,
+                'summary' => $forecast->summary_text,
+                'accuracy' => $forecast->mape ? round(100 - $forecast->mape, 1) : null,
+                'model_used' => $forecast->model_used,
+                'created_at' => $forecast->created_at,
+                'processing_time_ms' => $forecast->processing_time_ms
+            ],
             'message' => 'Forecast retrieved successfully'
+        ]);
+    }
+
+    /**
+     * List recent forecasts
+     */
+    public function index(Request $request)
+    {
+        $restaurantId = $request->query('restaurant_id') ?: session('selected_restaurant_id');
+        
+        if (!$restaurantId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No restaurant selected'
+            ], 400);
+        }
+
+        $forecasts = Forecast::where('restaurant_id', $restaurantId)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($forecast) {
+                return [
+                    'id' => $forecast->id,
+                    'created_at' => $forecast->created_at->format('Y-m-d H:i'),
+                    'period' => [
+                        'start' => $forecast->start_date?->format('M d, Y'),
+                        'end' => $forecast->end_date?->format('M d, Y')
+                    ],
+                    'horizon_days' => $forecast->horizon_days,
+                    'accuracy' => $forecast->mape ? round(100 - $forecast->mape, 1) : null,
+                    'model_used' => $forecast->model_used
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $forecasts,
+            'message' => 'Forecasts retrieved successfully'
         ]);
     }
 }

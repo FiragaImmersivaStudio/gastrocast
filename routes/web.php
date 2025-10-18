@@ -127,6 +127,7 @@ Route::middleware(['web'])->group(function () {
         // Forecast API
         Route::post('/forecast/run', [ForecastApiController::class, 'run']);
         Route::get('/forecast/summary', [ForecastApiController::class, 'summary']);
+        Route::get('/forecast', [ForecastApiController::class, 'index']);
         Route::get('/forecast/{forecast}', [ForecastApiController::class, 'show']);
         
         // Metrics API
