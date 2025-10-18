@@ -410,7 +410,18 @@ class DatasetController extends Controller
      */
     private function detectDateRange($worksheet, $type)
     {
-        $dateColumn = $type === 'customers' ? 'E' : ($type === 'inventory' ? 'H' : 'B'); // registration_date, last_updated, or date
+        // Menu datasets don't have date columns
+        if ($type === 'menu') {
+            return ['start' => null, 'end' => null];
+        }
+
+        $dateColumn = match($type) {
+            'sales' => 'B', // date column
+            'customers' => 'E', // registration_date column
+            'inventory' => 'H', // last_updated column
+            default => 'B'
+        };
+
         $highestRow = $worksheet->getHighestRow();
 
         $dates = [];

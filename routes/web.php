@@ -107,7 +107,6 @@ Route::middleware(['web'])->group(function () {
         // Settings
         Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile.update');
-        Route::post('/settings/restaurant', [App\Http\Controllers\SettingsController::class, 'updateRestaurant'])->name('settings.restaurant.update');
         Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
         Route::post('/settings/password', [App\Http\Controllers\SettingsController::class, 'changePassword'])->name('settings.password.change');
         Route::post('/settings/2fa/enable', [App\Http\Controllers\SettingsController::class, 'enable2FA'])->name('settings.2fa.enable');

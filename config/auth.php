@@ -39,6 +39,7 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            'remember' => 999999999, // Very long duration, practically permanent
         ],
     ],
 

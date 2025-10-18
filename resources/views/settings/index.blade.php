@@ -53,9 +53,6 @@
                 <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="pill">
                     <i class="fas fa-user me-2"></i>Profile
                 </a>
-                <a href="#restaurant" class="list-group-item list-group-item-action" data-bs-toggle="pill">
-                    <i class="fas fa-store me-2"></i>Restaurant Settings
-                </a>
                 <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="pill">
                     <i class="fas fa-bell me-2"></i>Notifications
                 </a>
@@ -125,81 +122,6 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Restaurant Settings -->
-            <div class="tab-pane fade" id="restaurant">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Restaurant Settings</h5>
-                    </div>
-                    <div class="card-body">
-                        @if(!$selectedRestaurant)
-                            <div class="alert alert-warning" role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>No Restaurant Selected</strong><br>
-                                Please select an active restaurant first from the restaurant management page before configuring restaurant settings.
-                                <br><br>
-                                <a href="{{ route('restaurants.index') }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-store me-1"></i>Go to Restaurant Management
-                                </a>
-                            </div>
-                        @else
-                            <form id="restaurantForm">
-                                @csrf
-                                <div class="mb-3">
-                                    <label for="restaurantName" class="form-label">Restaurant Name</label>
-                                    <input type="text" class="form-control" id="restaurantName" name="name" value="{{ $selectedRestaurant->name }}" required>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="category" class="form-label">Category</label>
-                                            <select class="form-select" id="category" name="category" required>
-                                                <option value="fast-food" {{ $selectedRestaurant->category == 'fast-food' ? 'selected' : '' }}>Fast Food</option>
-                                                <option value="casual-dining" {{ $selectedRestaurant->category == 'casual-dining' ? 'selected' : '' }}>Casual Dining</option>
-                                                <option value="fine-dining" {{ $selectedRestaurant->category == 'fine-dining' ? 'selected' : '' }}>Fine Dining</option>
-                                                <option value="cafe" {{ $selectedRestaurant->category == 'cafe' ? 'selected' : '' }}>Cafe</option>
-                                                <option value="bakery" {{ $selectedRestaurant->category == 'bakery' ? 'selected' : '' }}>Bakery</option>
-                                                <option value="food-truck" {{ $selectedRestaurant->category == 'food-truck' ? 'selected' : '' }}>Food Truck</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="currency" class="form-label">Currency</label>
-                                            <select class="form-select" id="currency" name="currency" required>
-                                                <option value="IDR" {{ ($selectedRestaurant->currency ?? 'IDR') == 'IDR' ? 'selected' : '' }}>IDR (Rp)</option>
-                                                <option value="USD" {{ ($selectedRestaurant->currency ?? 'IDR') == 'USD' ? 'selected' : '' }}>USD ($)</option>
-                                                <option value="EUR" {{ ($selectedRestaurant->currency ?? 'IDR') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
-                                                <option value="GBP" {{ ($selectedRestaurant->currency ?? 'IDR') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Address</label>
-                                    <textarea class="form-control" id="address" name="address" rows="3">{{ $selectedRestaurant->address }}</textarea>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="restaurantPhone" class="form-label">Phone</label>
-                                            <input type="tel" class="form-control" id="restaurantPhone" name="phone" value="{{ $selectedRestaurant->phone }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="restaurantEmail" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="restaurantEmail" name="email" value="{{ $selectedRestaurant->email }}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </form>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -711,42 +633,6 @@ $(document).ready(function() {
                 // Allow form to submit normally as fallback
                 setTimeout(() => {
                     $('#profileForm')[0].submit();
-                }, 2000);
-            }
-        });
-    });
-
-    // Restaurant form submission
-    $('#restaurantForm').on('submit', function(e) {
-        console.log("Submitting restaurant form");
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        $.ajax({
-            url: '{{ route("settings.restaurant.update") }}',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            success: function(data) {
-                if (data.success) {
-                    showAlert('success', data.message);
-                } else {
-                    showAlert('danger', data.message || 'An error occurred while updating restaurant settings');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', error);
-                console.error('Response:', xhr.responseText);
-                showAlert('danger', 'An error occurred while updating restaurant settings. Please try again.');
-                // Allow form to submit normally as fallback
-                setTimeout(() => {
-                    $('#restaurantForm')[0].submit();
                 }, 2000);
             }
         });

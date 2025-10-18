@@ -72,61 +72,6 @@ class SettingsController extends Controller
         }
     }
 
-    public function updateRestaurant(Request $request)
-    {
-        try {
-            $selectedRestaurantId = session('selected_restaurant_id');
-            
-            if (!$selectedRestaurantId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No restaurant selected. Please select a restaurant first.'
-                ], 400);
-            }
-            
-            $restaurant = Restaurant::findOrFail($selectedRestaurantId);
-            
-            // Check if user has permission to edit this restaurant
-            if (!Auth::user()->hasAccessToRestaurant($restaurant->id)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You do not have permission to edit this restaurant.'
-                ], 403);
-            }
-            
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'category' => 'required|string',
-                'currency' => 'required|string|max:3',
-                'address' => 'nullable|string',
-                'phone' => 'nullable|string|max:20',
-                'email' => 'nullable|email',
-            ]);
-            
-            $restaurant->update([
-                'name' => $request->name,
-                'category' => $request->category,
-                'currency' => $request->currency,
-                'address' => $request->address,
-                'phone' => $request->phone,
-                'email' => $request->email,
-            ]);
-            
-            Log::info('Restaurant updated: ' . $restaurant->id);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Restaurant settings updated successfully'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Restaurant update error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function updateNotifications(Request $request)
     {
         try {
