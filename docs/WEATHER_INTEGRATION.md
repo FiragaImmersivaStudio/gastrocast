@@ -131,13 +131,175 @@ Sample response from OpenWeatherMap API:
 
 ## Logging
 
-The system logs:
-- Start/end of weather fetch process
-- Number of API calls made
-- Number of weather records retrieved
-- Number of orders updated
-- Any errors or warnings
-- Orders without matching weather data
+The system provides comprehensive logging to help diagnose issues with weather data fetching and storage:
+
+### Dataset Processing Logs
+
+- **Start of sales data processing**: 
+  ```
+  Processing sales data for dataset {id}
+  ```
+- **End of sales data processing**:
+  ```
+  Finished processing sales data, now fetching weather data...
+  ```
+
+### Weather Fetch Initialization Logs
+
+- **Start of weather fetch process**:
+  ```
+  Starting weather data fetch for dataset {id}
+  ```
+- **Restaurant coordinates**:
+  ```
+  Restaurant coordinates: lat={latitude}, lon={longitude}
+  ```
+- **Orders found**:
+  ```
+  Found {count} orders without weather data for dataset {id}
+  ```
+- **Order date range**:
+  ```
+  Order date range: {earliest_date} to {latest_date}
+  ```
+
+### API Request Logs
+
+For each API call, the system logs:
+
+- **WeatherService request details**:
+  ```
+  WeatherService: Fetching historical weather data
+  [lat, lon, start, start_datetime, source]
+  ```
+- **Successful API response**:
+  ```
+  WeatherService: Successfully fetched historical weather data
+  [status_code, data_count]
+  ```
+- **Failed API response**:
+  ```
+  WeatherService: Failed to fetch historical weather data
+  [status_code, response_body, error_message]
+  ```
+- **Number of weather records fetched**:
+  ```
+  Fetched {count} weather records
+  ```
+- **API errors with response data**:
+  ```
+  Failed to fetch weather data: {error}
+  Weather API response: {json_encoded_response}
+  ```
+
+### Weather Data Matching Logs
+
+- **Start of matching process**:
+  ```
+  Starting to match weather data to {count} orders...
+  ```
+- **Empty weather data warning**:
+  ```
+  No weather data was retrieved from the API. Cannot update orders.
+  ```
+
+### Individual Order Update Logs
+
+For each order being updated:
+
+- **Weather data validation**:
+  ```
+  Invalid weather data structure for order {id}
+  [weather_data]
+  ```
+- **Successful update preparation**:
+  ```
+  Updating order {id} (order_no: {order_no}, order_dt: {datetime}) with weather data
+  [weather_data: {temp, condition, description, humidity, pressure, wind_speed, fetched_at}, time_diff_seconds]
+  ```
+- **Successful database update**:
+  ```
+  Successfully updated order {id} with weather data
+  ```
+- **Failed database update**:
+  ```
+  Failed to update order {id} with weather data - update() returned false
+  ```
+- **Exception during update**:
+  ```
+  Exception while updating order {id} with weather data: {error_message}
+  [exception, order_id, order_dt]
+  ```
+- **No matching weather data**:
+  ```
+  No weather data found for order {id} (order_no: {order_no}) at {datetime}
+  ```
+
+### Summary Logs
+
+- **Final update summary**:
+  ```
+  Weather data update summary for dataset {id}: Updated={count}, Failed={count}, NotFound={count}, Total={count}
+  ```
+- **Overall completion**:
+  ```
+  Completed weather data fetch. Made {count} API calls. Retrieved {count} weather records.
+  ```
+
+### Error Logs
+
+- **Top-level error**:
+  ```
+  Failed to fetch weather data for dataset {id}: {error_message}
+  ```
+
+### Log Levels
+
+The logging uses different levels for different severity:
+
+- **Info**: Normal operation and progress updates
+- **Debug**: Detailed successful operations (order updates)
+- **Warning**: Non-critical issues (missing weather data, empty API responses)
+- **Error**: Critical failures (invalid data structure, update exceptions)
+
+### Viewing Logs
+
+To view logs in Laravel:
+
+```bash
+# View latest log file
+tail -f storage/logs/laravel.log
+
+# Search for weather-related logs
+grep -i "weather" storage/logs/laravel.log
+
+# Search for a specific dataset
+grep "dataset 123" storage/logs/laravel.log
+
+# View only errors
+grep -i "error.*weather" storage/logs/laravel.log
+```
+
+### Troubleshooting with Logs
+
+1. **Weather data not being saved**:
+   - Check for "No weather data was retrieved from the API" warning
+   - Look for API response errors with status codes
+   - Check for "Failed to update order" messages
+
+2. **API issues**:
+   - Look for "WeatherService: Failed to fetch" errors
+   - Check the response_body in error logs for API error details
+   - Verify coordinates and timestamps in request logs
+
+3. **Database update issues**:
+   - Check for "update() returned false" messages
+   - Look for exception messages with stack traces
+   - Verify order IDs and timestamps in error logs
+
+4. **Data validation issues**:
+   - Look for "Invalid weather data structure" errors
+   - Check the weather_data field in error logs to see what structure was received
 
 ## Usage in Analysis
 
