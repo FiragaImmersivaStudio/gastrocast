@@ -26,6 +26,13 @@ class Order extends Model
         'payment_method',
         'notes',
         'dataset_id',
+        'weather_temp',
+        'weather_condition',
+        'weather_description',
+        'weather_humidity',
+        'weather_pressure',
+        'weather_wind_speed',
+        'weather_fetched_at',
     ];
 
     public function restaurant()
